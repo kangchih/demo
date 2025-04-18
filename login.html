@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEMO - 人力資源管理系統</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/login.css">
+</head>
+<body class="login-body">
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <img alt="" src="assets/images/demo.png" />            
+            </div>
+                <h1>人力資源管理系統</h1>
+                <p class="login-subtitle">HRMS</p>
+            </div>
+            <div class="login-form">
+                <h2>歡迎登入</h2>
+                <form id="login-form" action="index.html" method="GET">
+                    <div class="input-group">
+                        <label for="username">使用者名稱</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="username" name="username" placeholder="請輸入您的AD帳號" required>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="password">密碼</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="password" name="password" placeholder="請輸入您的密碼" required>
+                        </div>
+                    </div>
+                    <div class="remember-group">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="remember" name="remember">
+                            <span class="checkmark"></span>
+                            記住我
+                        </label>
+                        <a href="#" class="forgot-password">忘記密碼?</a>
+                    </div>
+                    <button type="submit" class="login-btn">登入系統</button>
+                </form>
+            </div>
+            <div class="login-footer">
+                <div class="quick-login">
+                    <p>快速登入選擇角色：</p>
+                    <div class="role-buttons">
+                        <button class="role-btn" data-role="admin" data-username="admin">系統管理員</button>
+                        <button class="role-btn" data-role="hr-manager" data-username="hrmanager">HR主管</button>
+                        <button class="role-btn" data-role="hr-staff" data-username="hrstaff">HR專員</button>
+                        <button class="role-btn" data-role="department-head" data-username="depthead">部門主管</button>
+                        <button class="role-btn" data-role="employee" data-username="employee">一般員工</button>
+                    </div>
+                </div>
+                <div class="login-info">
+                    <p>建議使用 Chrome, Firefox, Edge 瀏覽器</p>
+                    <p>© 2025 OnDot. 版權所有.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="login-banner">
+            <div class="banner-content">
+                <h2>人力資源管理系統 3.0</h2>
+                <p>整合人事管理、勤惰管理、薪資管理等功能，提供您全方位的人資解決方案</p>
+                <div class="banner-features">
+                    <div class="feature-item">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>個人化儀表板</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>勤惰管理</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>薪資管理</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>報表分析</span>
+                    </div>
+                </div>
+                <div class="banner-announcements">
+                    <h3><i class="fas fa-bullhorn"></i> 最新公告</h3>
+                    <div class="banner-announcement-item">
+                        <span class="date">2023/06/10</span>
+                        <p>系統將於6月15日進行例行維護，請提前完成相關作業。</p>
+                    </div>
+                </div>
+            </div>
+            <div class="banner-footer">
+                <p>技術支援：IT服務中心 - 分機: 1234</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/login.js"></script>
+</body>
+</html> 

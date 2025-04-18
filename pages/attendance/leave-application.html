@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>請假申請</title>
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <style>
+    .leave-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    
+    .leave-summary {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .leave-type-badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      margin-right: 5px;
+    }
+    
+    .leave-type-badge.annual {
+      background-color: rgba(13, 110, 253, 0.1);
+      color: #0d6efd;
+    }
+    
+    .leave-type-badge.sick {
+      background-color: rgba(220, 53, 69, 0.1);
+      color: #dc3545;
+    }
+    
+    .leave-type-badge.personal {
+      background-color: rgba(255, 193, 7, 0.1);
+      color: #ffc107;
+    }
+    
+    .leave-type-badge.marriage {
+      background-color: rgba(111, 66, 193, 0.1);
+      color: #6f42c1;
+    }
+    
+    .leave-type-badge.bereavement {
+      background-color: rgba(108, 117, 125, 0.1);
+      color: #6c757d;
+    }
+    
+    .leave-type-badge.maternity {
+      background-color: rgba(214, 51, 132, 0.1);
+      color: #d63384;
+    }
+    
+    .leave-status {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+    
+    .leave-status.approved {
+      background-color: rgba(40, 167, 69, 0.1);
+      color: #28a745;
+    }
+    
+    .leave-status.pending {
+      background-color: rgba(255, 193, 7, 0.1);
+      color: #ffc107;
+    }
+    
+    .leave-status.rejected {
+      background-color: rgba(220, 53, 69, 0.1);
+      color: #dc3545;
+    }
+    
+    .balance-card {
+      height: 100%;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .balance-card .card-body {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    
+    .balance-card .balance-title {
+      font-size: 14px;
+      color: #6c757d;
+    }
+    
+    .balance-card .balance-days {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    
+    .progress {
+      height: 8px;
+      margin-top: 10px;
+    }
+    
+    .history-item {
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .history-item:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+        <div class="sidebar-logo">
+          <img alt="" src="../../assets/images/logo.png" />
+        </div>
+        <ul class="nav flex-column sidebar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="../../index.html">
+              <i class="bi bi-speedometer2"></i> 首頁儀表板
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../../pages/employees/employee-list.html">
+              <i class="bi bi-people"></i> 人事管理
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../../pages/organization/org-chart.html">
+              <i class="bi bi-diagram-3"></i> 組織架構
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="../../pages/attendance/attendance-management.html">
+              <i class="bi bi-calendar-check"></i> 勤惰管理
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../../pages/payroll/payroll-management.html">
+              <i class="bi bi-cash-coin"></i> 薪資管理
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../../pages/announcement/announcements.html">
+              <i class="bi bi-megaphone"></i> 公告系統
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../../pages/reports/reports-dashboard.html">
+              <i class="bi bi-bar-chart"></i> 報表分析
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../../pages/settings/system-settings.html">
+              <i class="bi bi-gear"></i> 系統設定
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Main content -->
+      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1 class="h2">請假申請</h1>
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+              <li class="breadcrumb-item"><a href="../../index.html">首頁</a></li>
+              <li class="breadcrumb-item"><a href="attendance-management.html">勤惰管理</a></li>
+              <li class="breadcrumb-item active" aria-current="page">請假申請</li>
+            </ol>
+          </nav>
+        </div>
+
+        <div class="row">
+          <!-- Leave balances -->
+          <div class="col-md-12 mb-4">
+            <h4 class="mb-3">休假餘額</h4>
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <div class="card balance-card">
+                  <div class="card-body">
+                    <div class="balance-title">特別休假</div>
+                    <div class="balance-days">12 天</div>
+                    <div class="d-flex justify-content-between text-muted">
+                      <span>已使用: 3 天</span>
+                      <span>總計: 15 天</span>
+                    </div>
+                    <div class="progress">
+                      <div class="progress-bar bg-success" role="progressbar" style="width: 80%" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <div class="card balance-card">
+                  <div class="card-body">
+                    <div class="balance-title">病假</div>
+                    <div class="balance-days">28 天</div>
+                    <div class="d-flex justify-content-between text-muted">
+                      <span>已使用: 2 天</span>
+                      <span>總計: 30 天</span>
+                    </div>
+                    <div class="progress">
+                      <div class="progress-bar bg-info" role="progressbar" style="width: 93%" aria-valuenow="93" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <div class="card balance-card">
+                  <div class="card-body">
+                    <div class="balance-title">事假</div>
+                    <div class="balance-days">10 天</div>
+                    <div class="d-flex justify-content-between text-muted">
+                      <span>已使用: 2 天</span>
+                      <span>總計: 12 天</span>
+                    </div>
+                    <div class="progress">
+                      <div class="progress-bar bg-warning" role="progressbar" style="width: 83%" aria-valuenow="83" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Leave application form -->
+          <div class="col-md-8">
+            <div class="leave-card">
+              <div class="card-header bg-white py-3">
+                <h5 class="mb-0">請假申請表單</h5>
+              </div>
+              <div class="card-body">
+                <form id="leave-application-form">
+                  <div class="mb-3">
+                    <label for="leave-type" class="form-label">請假類型</label>
+                    <select class="form-select" id="leave-type" required>
+                      <option value="" selected disabled>請選擇請假類型</option>
+                      <option value="annual">特別休假</option>
+                      <option value="sick">病假</option>
+                      <option value="personal">事假</option>
+                      <option value="marriage">婚假</option>
+                      <option value="bereavement">喪假</option>
+                      <option value="maternity">產假</option>
+                      <option value="paternity">陪產假</option>
+                      <option value="other">其他</option>
+                    </select>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label for="leave-dates" class="form-label">請假日期</label>
+                    <input type="text" class="form-control" id="leave-dates" placeholder="請選擇日期範圍" required>
+                  </div>
+                  
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label for="start-time" class="form-label">開始時間</label>
+                      <select class="form-select" id="start-time" required>
+                        <option value="full-day">全天</option>
+                        <option value="am">上午</option>
+                        <option value="pm">下午</option>
+                        <option value="custom">自訂時間</option>
+                      </select>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                      <label for="end-time" class="form-label">結束時間</label>
+                      <select class="form-select" id="end-time" required>
+                        <option value="full-day">全天</option>
+                        <option value="am">上午</option>
+                        <option value="pm">下午</option>
+                        <option value="custom">自訂時間</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div class="mb-3" id="custom-time-container" style="display: none;">
+                    <div class="row">
+                      <div class="col-md-6">
+                        <label class="form-label">自訂開始時間</label>
+                        <input type="time" class="form-control" id="custom-start-time">
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label">自訂結束時間</label>
+                        <input type="time" class="form-control" id="custom-end-time">
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label for="total-days" class="form-label">總天數</label>
+                    <input type="text" class="form-control" id="total-days" readonly value="0 天">
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label for="reason" class="form-label">請假原因</label>
+                    <textarea class="form-control" id="reason" rows="3" required></textarea>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label for="contact-info" class="form-label">請假期間聯絡方式</label>
+                    <input type="tel" class="form-control" id="contact-info" placeholder="請輸入電話號碼">
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label for="attachment" class="form-label">附件上傳</label>
+                    <input class="form-control" type="file" id="attachment">
+                    <div class="form-text">病假三天以上需檢附醫師證明</div>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <label for="backup-person" class="form-label">職務代理人</label>
+                    <select class="form-select" id="backup-person" required>
+                      <option value="" selected disabled>請選擇代理人</option>
+                      <option value="10001">張忠明 (10001)</option>
+                      <option value="10002">林美玲 (10002)</option>
+                      <option value="10003">陳志明 (10003)</option>
+                      <option value="10004">王小華 (10004)</option>
+                      <option value="10005">李小龍 (10005)</option>
+                    </select>
+                  </div>
+                  
+                  <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="button" class="btn btn-outline-secondary me-md-2" id="save-draft-btn">
+                      <i class="bi bi-save"></i> 儲存草稿
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                      <i class="bi bi-send"></i> 送出申請
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Leave history and guidelines -->
+          <div class="col-md-4">
+            <div class="leave-card mb-4">
+              <div class="card-header bg-white py-3">
+                <h5 class="mb-0">最近請假紀錄</h5>
+              </div>
+              <div class="card-body">
+                <div class="history-item">
+                  <div class="d-flex justify-content-between">
+                    <div><span class="leave-type-badge annual">特休</span></div>
+                    <div><span class="leave-status approved">已核准</span></div>
+                  </div>
+                  <div class="mt-2">2023/03/20 - 2023/03/21</div>
+                  <div class="text-muted small">2天 | 家庭旅遊</div>
+                </div>
+                <div class="history-item">
+                  <div class="d-flex justify-content-between">
+                    <div><span class="leave-type-badge sick">病假</span></div>
+                    <div><span class="leave-status approved">已核准</span></div>
+                  </div>
+                  <div class="mt-2">2023/02/15</div>
+                  <div class="text-muted small">1天 | 感冒就醫</div>
+                </div>
+                <div class="history-item">
+                  <div class="d-flex justify-content-between">
+                    <div><span class="leave-type-badge personal">事假</span></div>
+                    <div><span class="leave-status approved">已核准</span></div>
+                  </div>
+                  <div class="mt-2">2023/01/05 (下午)</div>
+                  <div class="text-muted small">0.5天 | 個人事務</div>
+                </div>
+                <div class="text-center mt-3">
+                  <a href="leave-history.html" class="btn btn-sm btn-outline-primary">查看更多紀錄</a>
+                </div>
+              </div>
+            </div>
+            
+            <div class="leave-card">
+              <div class="card-header bg-white py-3">
+                <h5 class="mb-0">請假規則說明</h5>
+              </div>
+              <div class="card-body">
+                <ul class="small">
+                  <li>特別休假：依勞基法規定，工作滿一年者享有7天特休</li>
+                  <li>病假：全年30天，連續請假3天以上需附醫師證明</li>
+                  <li>事假：全年14天，事假期間不支薪</li>
+                  <li>婚假：結婚者給予8天有薪婚假</li>
+                  <li>喪假：直系親屬喪亡給予8天喪假，祖父母5天</li>
+                  <li>請假至少需提前3天申請（緊急情況除外）</li>
+                  <li>主管審核時間為24小時內</li>
+                </ul>
+                <div class="text-center mt-3">
+                  <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#leaveRulesModal">
+                    查看完整規則
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  
+  <!-- Leave Rules Modal -->
+  <div class="modal fade" id="leaveRulesModal" tabindex="-1" aria-labelledby="leaveRulesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="leaveRulesModalLabel">請假規則</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <h6>特別休假規則</h6>
+          <p>依勞動基準法第38條規定，員工在同一公司工作滿一定期間者，每年應依下列規定給予特別休假：</p>
+          <ul>
+            <li>工作滿6個月以上1年未滿者，3日</li>
+            <li>工作滿1年以上2年未滿者，7日</li>
+            <li>工作滿2年以上3年未滿者，10日</li>
+            <li>工作滿3年以上5年未滿者，14日</li>
+            <li>工作滿5年以上10年未滿者，15日</li>
+            <li>工作滿10年以上者，每1年加1日，加至30日為止</li>
+          </ul>
+          
+          <h6>病假規則</h6>
+          <p>員工因普通傷害、疾病或生理原因必須治療或休養者，得依下列規定請普通傷病假：</p>
+          <ul>
+            <li>未住院者，1年內合計不得超過30日</li>
+            <li>住院者，2年內合計不得超過1年</li>
+            <li>未住院傷病假與住院傷病假2年內合計不得超過1年</li>
+          </ul>
+          
+          <h6>申請流程</h6>
+          <ol>
+            <li>員工填寫線上請假單</li>
+            <li>送交直屬主管審核</li>
+            <li>視請假天數及類型，可能需部門經理複核</li>
+            <li>人事部門最終確認並登記</li>
+            <li>系統自動發送審核結果通知</li>
+          </ol>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize date picker for leave dates
+      const leaveDates = flatpickr("#leave-dates", {
+        mode: "range",
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        locale: {
+          firstDayOfWeek: 1 // Monday as first day
+        },
+        onChange: function(selectedDates, dateStr) {
+          calculateDays();
+        }
+      });
+      
+      // Show/hide custom time inputs
+      document.getElementById('start-time').addEventListener('change', function() {
+        toggleCustomTimeInputs();
+      });
+      
+      document.getElementById('end-time').addEventListener('change', function() {
+        toggleCustomTimeInputs();
+      });
+      
+      function toggleCustomTimeInputs() {
+        const startTime = document.getElementById('start-time').value;
+        const endTime = document.getElementById('end-time').value;
+        const customTimeContainer = document.getElementById('custom-time-container');
+        
+        if (startTime === 'custom' || endTime === 'custom') {
+          customTimeContainer.style.display = 'block';
+        } else {
+          customTimeContainer.style.display = 'none';
+        }
+        
+        calculateDays();
+      }
+      
+      // Calculate total days
+      function calculateDays() {
+        const dateStr = document.getElementById('leave-dates').value;
+        const startTime = document.getElementById('start-time').value;
+        const endTime = document.getElementById('end-time').value;
+        
+        if (!dateStr) {
+          document.getElementById('total-days').value = "0 天";
+          return;
+        }
+        
+        const dates = dateStr.split(" to ");
+        if (dates.length === 1) {
+          // Single day
+          if (startTime === 'am' && endTime === 'pm') {
+            document.getElementById('total-days').value = "1 天";
+          } else if (startTime === 'am' && endTime === 'am' || startTime === 'pm' && endTime === 'pm') {
+            document.getElementById('total-days').value = "0.5 天";
+          } else if (startTime === 'full-day' && endTime === 'full-day') {
+            document.getElementById('total-days').value = "1 天";
+          } else {
+            document.getElementById('total-days').value = "請確認時間";
+          }
+        } else if (dates.length === 2) {
+          // Date range
+          const start = new Date(dates[0]);
+          const end = new Date(dates[1]);
+          const diffTime = Math.abs(end - start);
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+          
+          document.getElementById('total-days').value = diffDays + " 天";
+        }
+      }
+      
+      // Form submission
+      document.getElementById('leave-application-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Validation would go here
+        
+        // Show confirmation message
+        if (confirm('確定要送出請假申請嗎？')) {
+          // Submit form - in a real app, you'd use AJAX here
+          alert('申請已送出，等待主管審核。');
+          this.reset();
+          document.getElementById('total-days').value = "0 天";
+        }
+      });
+      
+      // Save draft button
+      document.getElementById('save-draft-btn').addEventListener('click', function() {
+        alert('已儲存為草稿');
+      });
+    });
+  </script>
+</body>
+</html> 

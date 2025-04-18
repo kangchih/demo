@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>組織架構 -DEMO</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/dashboard.css">
+    <style>
+        .org-card {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--spacing-lg);
+            overflow: hidden;
+        }
+        
+        .org-card-header {
+            background-color: var(--bg-light);
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .org-card-body {
+            padding: var(--spacing-md);
+        }
+        
+        .org-chart-container {
+            width: 100%;
+            overflow-x: auto;
+            padding: var(--spacing-lg) 0;
+        }
+        
+        .org-chart {
+            position: relative;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .org-level {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-bottom: var(--spacing-xl);
+            position: relative;
+        }
+        
+        .org-level::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            height: 20px;
+            border-left: 2px solid var(--border-color);
+        }
+        
+        .org-level:first-child::before {
+            display: none;
+        }
+        
+        .org-level::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 20%;
+            right: 20%;
+            border-top: 2px solid var(--border-color);
+            z-index: 1;
+        }
+        
+        .org-item {
+            position: relative;
+            background-color: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: var(--spacing-md);
+            margin: 0 var(--spacing-lg);
+            min-width: 200px;
+            text-align: center;
+            z-index: 2;
+        }
+        
+        .org-item.executive {
+            background-color: rgba(0, 84, 61, 0.05);
+            border-color: var(--primary-color);
+        }
+        
+        .org-item.department {
+            background-color: rgba(0, 126, 165, 0.05);
+            border-color: var(--secondary-color);
+        }
+        
+        .org-item h3 {
+            margin-bottom: var(--spacing-xs);
+            font-size: var(--font-size-md);
+        }
+        
+        .org-item p {
+            color: var(--text-light);
+            font-size: var(--font-size-sm);
+            margin: 0;
+        }
+        
+        .org-item .employee-count {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: var(--accent-color);
+            color: var(--text-white);
+            font-size: var(--font-size-xs);
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+        
+        .org-item .department-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: var(--spacing-sm);
+        }
+        
+        .org-item .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: var(--spacing-sm);
+        }
+        
+        .org-item .info {
+            text-align: left;
+        }
+        
+        .org-item .name {
+            font-weight: 600;
+            font-size: var(--font-size-sm);
+        }
+        
+        .org-item .title {
+            font-size: var(--font-size-xs);
+            color: var(--text-light);
+        }
+        
+        .toolbar {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .search-control {
+            display: flex;
+            align-items: center;
+            background: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            overflow: hidden;
+            padding: 0 var(--spacing-sm);
+            flex: 1;
+        }
+        
+        .search-control input {
+            border: none;
+            padding: var(--spacing-sm);
+            width: 100%;
+            outline: none;
+        }
+        
+        .search-control i {
+            color: var(--text-light);
+        }
+        
+        .view-controls {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+        
+        .view-btn {
+            background: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-sm) var(--spacing-md);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color);
+            transition: all var(--transition-fast);
+        }
+        
+        .view-btn:hover, .view-btn.active {
+            background: var(--primary-color);
+            color: var(--text-white);
+            border-color: var(--primary-color);
+        }
+        
+        .view-btn i {
+            margin-right: var(--spacing-xs);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img alt="" src="../../assets/images/demo.png" />
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="../../index.html"><i class="fas fa-tachometer-alt"></i>儀表板</a>
+                    </li>
+                    <li>
+                        <a href="../employees/employee-list.html"><i class="fas fa-users"></i>員工管理</a>
+                    </li>
+                    <li class="active">
+                        <a href="org-chart.html"><i class="fas fa-sitemap"></i>組織架構</a>
+                    </li>
+                    <li>
+                        <a href="../attendance/attendance.html"><i class="fas fa-calendar-check"></i>勤惰管理</a>
+                    </li>
+                    <li>
+                        <a href="../payroll/payroll.html"><i class="fas fa-money-bill-wave"></i>薪資與獎金</a>
+                    </li>
+                    <li>
+                        <a href="../announcement/announcements.html"><i class="fas fa-bullhorn"></i>公布欄</a>
+                    </li>
+                    <li>
+                        <a href="../reports/reports.html"><i class="fas fa-chart-bar"></i>報表中心</a>
+                    </li>
+                    <li>
+                        <a href="../settings/settings.html"><i class="fas fa-cog"></i>系統設定</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <span class="user-info">
+                    <img src="../../assets/images/user-avatar.jpg" alt="使用者頭像" class="avatar">
+                    <span class="user-name">王小明</span>
+                    <span class="user-role">HR專員</span>
+                </span>
+                <a href="../../login.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2>組織架構</h2>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <input type="text" placeholder="搜尋...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <div class="messages">
+                        <i class="fas fa-envelope"></i>
+                        <span class="badge">5</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <!-- 組織架構工具列 -->
+                <div class="toolbar">
+                    <div class="search-control">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="搜尋部門或職位...">
+                    </div>
+                    <div class="view-controls">
+                        <button class="view-btn active"><i class="fas fa-sitemap"></i>組織圖</button>
+                        <button class="view-btn"><i class="fas fa-list"></i>列表</button>
+                        <button class="view-btn"><i class="fas fa-th-large"></i>卡片</button>
+                    </div>
+                </div>
+
+                <!-- 組織架構圖 -->
+                <div class="org-card">
+                    <div class="org-card-header">
+                        <h3><i class="fas fa-sitemap"></i> DEMO組織架構</h3>
+                        <div class="header-actions">
+                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-plus"></i> 新增部門</button>
+                            <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-print"></i> 列印</button>
+                            <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-download"></i> 匯出</button>
+                        </div>
+                    </div>
+                    <div class="org-card-body">
+                        <div class="org-chart-container">
+                            <div class="org-chart">
+                                <!-- 第一層：總經理 -->
+                                <div class="org-level">
+                                    <div class="org-item executive">
+                                        <h3>總經理室</h3>
+                                        <div class="department-info">
+                                            <img src="../../assets/images/user-avatar.jpg" alt="總經理" class="avatar">
+                                            <div class="info">
+                                                <div class="name">張志偉</div>
+                                                <div class="title">總經理</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 第二層：副總經理 -->
+                                <div class="org-level">
+                                    <div class="org-item executive">
+                                        <h3>營運副總</h3>
+                                        <div class="department-info">
+                                            <img src="../../assets/images/user-avatar.jpg" alt="營運副總" class="avatar">
+                                            <div class="info">
+                                                <div class="name">林美玲</div>
+                                                <div class="title">副總經理</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="org-item executive">
+                                        <h3>技術副總</h3>
+                                        <div class="department-info">
+                                            <img src="../../assets/images/user-avatar.jpg" alt="技術副總" class="avatar">
+                                            <div class="info">
+                                                <div class="name">王大明</div>
+                                                <div class="title">副總經理</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 第三層：各部門 -->
+                                <div class="org-level">
+                                    <div class="org-item department">
+                                        <span class="employee-count">25</span>
+                                        <h3>業務部</h3>
+                                        <div class="department-info">
+                                            <img src="../../assets/images/user-avatar.jpg" alt="業務部主管" class="avatar">
+                                            <div class="info">
+                                                <div class="name">陳麗華</div>
+                                                <div class="title">部門主管</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="org-item department">
+                                        <span class="employee-count">18</span>
+                                        <h3>航務部</h3>
+                                        <div class="department-info">
+                                            <img src="../../assets/images/user-avatar.jpg" alt="航務部主管" class="avatar">
+                                            <div class="info">
+                                                <div class="name">李志明</div>
+                                                <div class="title">部門主管</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="org-item department">
+                                        <span class="employee-count">12</span>
+                                        <h3>人力資源部</h3>
+                                        <div class="department-info">
+                                            <img src="../../assets/images/user-avatar.jpg" alt="人力資源部主管" class="avatar">
+                                            <div class="info">
+                                                <div class="name">蔡依婷</div>
+                                                <div class="title">部門主管</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="org-item department">
+                                        <span class="employee-count">20</span>
+                                        <h3>機務工程部</h3>
+                                        <div class="department-info">
+                                            <img src="../../assets/images/user-avatar.jpg" alt="機務工程部主管" class="avatar">
+                                            <div class="info">
+                                                <div class="name">吳建忠</div>
+                                                <div class="title">部門主管</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 第四層：子部門 -->
+                                <div class="org-level">
+                                    <div class="org-item department">
+                                        <span class="employee-count">10</span>
+                                        <h3>薪資福利課</h3>
+                                        <div class="department-info">
+                                            <img src="../../assets/images/user-avatar.jpg" alt="薪資福利課主管" class="avatar">
+                                            <div class="info">
+                                                <div class="name">林小芳</div>
+                                                <div class="title">課長</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="org-item department">
+                                        <span class="employee-count">8</span>
+                                        <h3>人才招募課</h3>
+                                        <div class="department-info">
+                                            <img src="../../assets/images/user-avatar.jpg" alt="人才招募課主管" class="avatar">
+                                            <div class="info">
+                                                <div class="name">張美麗</div>
+                                                <div class="title">課長</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="org-item department">
+                                        <span class="employee-count">7</span>
+                                        <h3>員工培訓課</h3>
+                                        <div class="department-info">
+                                            <img src="../../assets/images/user-avatar.jpg" alt="員工培訓課主管" class="avatar">
+                                            <div class="info">
+                                                <div class="name">王大同</div>
+                                                <div class="title">課長</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 部門統計資訊 -->
+                <div class="org-card">
+                    <div class="org-card-header">
+                        <h3><i class="fas fa-chart-pie"></i> 部門統計資訊</h3>
+                    </div>
+                    <div class="org-card-body">
+                        <div id="department-stats-chart" style="height: 300px; width: 100%;">
+                            <!-- 圖表將透過JavaScript動態生成 -->
+                            <div style="background-color: var(--bg-light); height: 100%; display: flex; justify-content: center; align-items: center; border-radius: var(--border-radius-md);">
+                                <p style="color: var(--text-light);">部門人數統計圖表將在此處顯示</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 側邊欄收合功能
+            $('#menu-toggle').click(function() {
+                $('.sidebar').toggleClass('collapsed');
+                $('.main-content').toggleClass('expanded');
+            });
+
+            // 視圖切換功能
+            $('.view-btn').click(function() {
+                $('.view-btn').removeClass('active');
+                $(this).addClass('active');
+            });
+        });
+    </script>
+</body>
+</html> 

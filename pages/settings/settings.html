@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系統設定 - DEMO</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/dashboard.css">
+    <style>
+        .settings-card {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--spacing-lg);
+            overflow: hidden;
+        }
+        
+        .settings-card-header {
+            background-color: var(--bg-light);
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .settings-card-body {
+            padding: var(--spacing-md);
+        }
+        
+        .settings-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: var(--spacing-md);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        .settings-tab {
+            padding: var(--spacing-sm) var(--spacing-md);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+            color: var(--text-light);
+            transition: all var(--transition-fast);
+        }
+        
+        .settings-tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .settings-tab:hover:not(.active) {
+            background-color: var(--bg-light);
+        }
+        
+        .settings-tab i {
+            margin-right: var(--spacing-xs);
+        }
+        
+        .settings-section {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            border: 1px solid var(--border-color);
+        }
+        
+        .settings-section h4 {
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-xs);
+            border-bottom: 1px solid var(--border-light);
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: var(--spacing-xs);
+            font-weight: 500;
+        }
+        
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            width: 100%;
+            padding: var(--spacing-sm);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            background-color: var(--bg-white);
+        }
+        
+        .form-group input:focus, 
+        .form-group select:focus, 
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 84, 61, 0.1);
+        }
+        
+        .btn-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-md);
+        }
+        
+        .table-settings {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table-settings th, 
+        .table-settings td {
+            padding: var(--spacing-sm);
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .table-settings th {
+            font-weight: 600;
+            background-color: var(--bg-light);
+        }
+        
+        .table-settings tr:hover {
+            background-color: var(--bg-lighter);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25em 0.6em;
+            font-size: 80%;
+            font-weight: 500;
+            border-radius: 0.25rem;
+            color: var(--text-white);
+        }
+        
+        .badge-success {
+            background-color: var(--success-color);
+        }
+        
+        .badge-danger {
+            background-color: var(--danger-color);
+        }
+        
+        .search-container {
+            display: flex;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .search-container input {
+            flex-grow: 1;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            border-right: none;
+        }
+        
+        .search-container button {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        
+        .upload-btn {
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            background-color: var(--bg-white);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--border-radius-sm);
+            font-size: var(--font-size-md);
+            cursor: pointer;
+        }
+        
+        .upload-btn-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img alt="" src="../../assets/images/demo.png" />
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="../../index.html"><i class="fas fa-tachometer-alt"></i>儀表板</a>
+                    </li>
+                    <li>
+                        <a href="../employees/employee-list.html"><i class="fas fa-users"></i>員工管理</a>
+                    </li>
+                    <li>
+                        <a href="../organization/org-chart.html"><i class="fas fa-sitemap"></i>組織架構</a>
+                    </li>
+                    <li>
+                        <a href="../attendance/attendance.html"><i class="fas fa-calendar-check"></i>勤惰管理</a>
+                    </li>
+                    <li>
+                        <a href="../payroll/payroll.html"><i class="fas fa-money-bill-wave"></i>薪資與獎金</a>
+                    </li>
+                    <li>
+                        <a href="../announcement/announcements.html"><i class="fas fa-bullhorn"></i>公布欄</a>
+                    </li>
+                    <li>
+                        <a href="../reports/reports.html"><i class="fas fa-chart-bar"></i>報表中心</a>
+                    </li>
+                    <li class="active">
+                        <a href="settings.html"><i class="fas fa-cog"></i>系統設定</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <span class="user-info">
+                    <img src="../../assets/images/user-avatar.jpg" alt="使用者頭像" class="avatar">
+                    <span class="user-name">王小明</span>
+                    <span class="user-role">HR專員</span>
+                </span>
+                <a href="../../login.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2>系統設定</h2>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <input type="text" placeholder="搜尋...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <div class="messages">
+                        <i class="fas fa-envelope"></i>
+                        <span class="badge">5</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <!-- Settings Content -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <h3><i class="fas fa-cog"></i> 系統設定</h3>
+                    </div>
+                    <div class="settings-card-body">
+                        <div class="settings-tabs">
+                            <div class="settings-tab active" data-tab="company"><i class="fas fa-building"></i> 公司資訊</div>
+                            <div class="settings-tab" data-tab="attendance"><i class="fas fa-calendar-check"></i> 出勤設定</div>
+                            <div class="settings-tab" data-tab="leave"><i class="fas fa-calendar-plus"></i> 假別設定</div>
+                            <div class="settings-tab" data-tab="users"><i class="fas fa-user-cog"></i> 使用者管理</div>
+                            <div class="settings-tab" data-tab="notifications"><i class="fas fa-bell"></i> 通知設定</div>
+                            <div class="settings-tab" data-tab="backup"><i class="fas fa-database"></i> 資料備份</div>
+                        </div>
+                    
+                        <!-- Company Information Tab -->
+                        <div id="company" class="tab-content active">
+                            <div class="settings-section">
+                                <h4><i class="fas fa-building"></i> 公司基本資訊</h4>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <form>
+                                            <div class="form-group">
+                                                <label for="company-name">公司名稱</label>
+                                                <input type="text" id="company-name" value="XX股份有限公司" class="form-control">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="company-id">統一編號</label>
+                                                <input type="text" id="company-id" value="12345678" class="form-control">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="company-address">公司地址</label>
+                                                <input type="text" id="company-address" value="台北市松山區敦化北路376號" class="form-control">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="company-phone">公司電話</label>
+                                                <input type="text" id="company-phone" value="02-2501-1999" class="form-control">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="company-email">電子郵件</label>
+                                                <input type="email" id="company-email" value="info@demo.com" class="form-control">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>公司標誌</label>
+                                                <div class="logo-preview" style="margin-bottom: var(--spacing-sm);">
+                                                    <img alt="" src="../../assets/images/demo.png" />                                                </div>
+                                                <div class="upload-btn-wrapper">
+                                                    <button class="upload-btn"><i class="fas fa-upload"></i> 上傳新標誌</button>
+                                                    <input type="file" name="company-logo" />
+                                                </div>
+                                            </div>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-outline-secondary">取消</button>
+                                                <button type="submit" class="btn btn-primary">儲存變更</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-section">
+                                <h4><i class="fas fa-calendar-alt"></i> 公司行事曆設定</h4>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="fiscal-year-start">會計年度開始月份</label>
+                                            <select id="fiscal-year-start" class="form-control">
+                                                <option>1月</option>
+                                                <option selected>4月</option>
+                                                <option>7月</option>
+                                                <option>10月</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="work-week-start">工作週開始日</label>
+                                            <select id="work-week-start" class="form-control">
+                                                <option selected>星期一</option>
+                                                <option>星期日</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" checked> 自動同步國定假日
+                                    </label>
+                                </div>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-outline-secondary">取消</button>
+                                    <button type="button" class="btn btn-primary">儲存變更</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Attendance Settings Tab -->
+                        <div id="attendance" class="tab-content">
+                            <div class="settings-section">
+                                <h4><i class="fas fa-clock"></i> 工作時間設定</h4>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="work-start-time">上班時間</label>
+                                            <input type="time" id="work-start-time" value="09:00" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="work-end-time">下班時間</label>
+                                            <input type="time" id="work-end-time" value="18:00" class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="lunch-start-time">午休開始時間</label>
+                                            <input type="time" id="lunch-start-time" value="12:00" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="lunch-end-time">午休結束時間</label>
+                                            <input type="time" id="lunch-end-time" value="13:00" class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" checked> 啟用彈性工時
+                                    </label>
+                                </div>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-outline-secondary">取消</button>
+                                    <button type="button" class="btn btn-primary">儲存變更</button>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-section">
+                                <h4><i class="fas fa-user-clock"></i> 出勤規則設定</h4>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="grace-period">遲到寬限時間（分鐘）</label>
+                                            <input type="number" id="grace-period" value="10" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="min-overtime">最小加班計算單位（分鐘）</label>
+                                            <input type="number" id="min-overtime" value="30" class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="overtime-approval">加班核准方式</label>
+                                            <select id="overtime-approval" class="form-control">
+                                                <option value="manager" selected>部門主管審核</option>
+                                                <option value="hr">HR審核</option>
+                                                <option value="auto">自動核准</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="absence-handling">缺勤處理方式</label>
+                                            <select id="absence-handling" class="form-control">
+                                                <option value="auto-leave" selected>自動扣除特休假</option>
+                                                <option value="manual">手動處理</option>
+                                                <option value="notify">僅通知HR</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" checked> 啟用遲到自動通知
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" checked> 啟用缺勤自動通知
+                                    </label>
+                                </div>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-outline-secondary">取消</button>
+                                    <button type="button" class="btn btn-primary">儲存變更</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Leave Settings Tab -->
+                        <div id="leave" class="tab-content">
+                            <div class="settings-section">
+                                <h4><i class="fas fa-list"></i> 假別管理</h4>
+                                <div class="table-responsive">
+                                    <table class="table-settings">
+                                        <thead>
+                                            <tr>
+                                                <th>假別名稱</th>
+                                                <th>代碼</th>
+                                                <th>天數上限</th>
+                                                <th>支薪狀態</th>
+                                                <th>需證明文件</th>
+                                                <th>動作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>特別休假</td>
+                                                <td>AL</td>
+                                                <td>14</td>
+                                                <td><span class="badge badge-success">支薪</span></td>
+                                                <td><span class="badge badge-danger">不需要</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>病假</td>
+                                                <td>SL</td>
+                                                <td>30</td>
+                                                <td><span class="badge badge-success">支薪 50%</span></td>
+                                                <td><span class="badge badge-success">需要</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>事假</td>
+                                                <td>PL</td>
+                                                <td>14</td>
+                                                <td><span class="badge badge-danger">不支薪</span></td>
+                                                <td><span class="badge badge-danger">不需要</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>婚假</td>
+                                                <td>ML</td>
+                                                <td>8</td>
+                                                <td><span class="badge badge-success">支薪</span></td>
+                                                <td><span class="badge badge-success">需要</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>喪假</td>
+                                                <td>BL</td>
+                                                <td>3-8</td>
+                                                <td><span class="badge badge-success">支薪</span></td>
+                                                <td><span class="badge badge-success">需要</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>產假</td>
+                                                <td>MAL</td>
+                                                <td>56</td>
+                                                <td><span class="badge badge-success">支薪</span></td>
+                                                <td><span class="badge badge-success">需要</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="btn-group" style="margin-top: var(--spacing-md);">
+                                    <button type="button" class="btn btn-primary"><i class="fas fa-plus"></i> 新增假別</button>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-section">
+                                <h4><i class="fas fa-calendar-plus"></i> 特休假計算設定</h4>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="annual-leave-calc">特休計算方式</label>
+                                            <select id="annual-leave-calc" class="form-control">
+                                                <option value="work-anniversary" selected>到職週年計算</option>
+                                                <option value="calendar-year">每年1月重新計算</option>
+                                                <option value="fiscal-year">會計年度重新計算</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="leave-carryover">特休假結轉設定</label>
+                                            <select id="leave-carryover" class="form-control">
+                                                <option value="full" selected>全數結轉</option>
+                                                <option value="partial">部分結轉</option>
+                                                <option value="none">不結轉</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" checked> 自動發送特休假到期提醒
+                                    </label>
+                                </div>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-outline-secondary">取消</button>
+                                    <button type="button" class="btn btn-primary">儲存變更</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- User Management Tab -->
+                        <div id="users" class="tab-content">
+                            <div class="settings-section">
+                                <h4><i class="fas fa-users"></i> 使用者管理</h4>
+                                <div class="search-container">
+                                    <input type="text" placeholder="搜尋使用者..." class="form-control">
+                                    <button class="btn btn-primary"><i class="fas fa-search"></i></button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table-settings">
+                                        <thead>
+                                            <tr>
+                                                <th>使用者名稱</th>
+                                                <th>電子郵件</th>
+                                                <th>角色</th>
+                                                <th>部門</th>
+                                                <th>狀態</th>
+                                                <th>最後登入</th>
+                                                <th>動作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>王小明</td>
+                                                <td>wang@demo.com</td>
+                                                <td>系統管理員</td>
+                                                <td>資訊部</td>
+                                                <td><span class="badge badge-success">啟用</span></td>
+                                                <td>2023-06-12 10:30</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                                    <button class="btn btn-sm btn-danger"><i class="fas fa-lock"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>陳小華</td>
+                                                <td>chen@demo.com</td>
+                                                <td>人資主管</td>
+                                                <td>人力資源部</td>
+                                                <td><span class="badge badge-success">啟用</span></td>
+                                                <td>2023-06-15 09:15</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                                    <button class="btn btn-sm btn-danger"><i class="fas fa-lock"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>林小玲</td>
+                                                <td>lin@demo.com</td>
+                                                <td>部門主管</td>
+                                                <td>業務部</td>
+                                                <td><span class="badge badge-success">啟用</span></td>
+                                                <td>2023-06-14 14:45</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                                    <button class="btn btn-sm btn-danger"><i class="fas fa-lock"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>張大明</td>
+                                                <td>zhang@demo.com</td>
+                                                <td>一般使用者</td>
+                                                <td>財務部</td>
+                                                <td><span class="badge badge-danger">停用</span></td>
+                                                <td>2023-06-01 11:20</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                                    <button class="btn btn-sm btn-success"><i class="fas fa-unlock"></i></button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="btn-group" style="margin-top: var(--spacing-md);">
+                                    <button type="button" class="btn btn-primary"><i class="fas fa-plus"></i> 新增使用者</button>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-section">
+                                <h4><i class="fas fa-user-tag"></i> 角色與權限管理</h4>
+                                <div class="table-responsive">
+                                    <table class="table-settings">
+                                        <thead>
+                                            <tr>
+                                                <th>角色名稱</th>
+                                                <th>描述</th>
+                                                <th>使用者數量</th>
+                                                <th>動作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>系統管理員</td>
+                                                <td>具有系統所有功能的完整權限</td>
+                                                <td>2</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                                    <button class="btn btn-sm btn-info"><i class="fas fa-key"></i> 設定權限</button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>人資主管</td>
+                                                <td>人力資源相關功能的管理權限</td>
+                                                <td>3</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                                    <button class="btn btn-sm btn-info"><i class="fas fa-key"></i> 設定權限</button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>部門主管</td>
+                                                <td>部門管理與審核權限</td>
+                                                <td>8</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                                    <button class="btn btn-sm btn-info"><i class="fas fa-key"></i> 設定權限</button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>一般使用者</td>
+                                                <td>基本自助服務權限</td>
+                                                <td>45</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                                                    <button class="btn btn-sm btn-info"><i class="fas fa-key"></i> 設定權限</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="btn-group" style="margin-top: var(--spacing-md);">
+                                    <button type="button" class="btn btn-primary"><i class="fas fa-plus"></i> 新增角色</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Notification Settings Tab -->
+                        <div id="notifications" class="tab-content">
+                            <div class="settings-section">
+                                <h4><i class="fas fa-bell"></i> 通知設定</h4>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="notify-method">主要通知方式</label>
+                                            <select id="notify-method" class="form-control">
+                                                <option value="email-system" selected>系統通知 + 電子郵件</option>
+                                                <option value="email">僅電子郵件</option>
+                                                <option value="system">僅系統通知</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="digest-frequency">通知摘要頻率</label>
+                                            <select id="digest-frequency" class="form-control">
+                                                <option value="never">不發送摘要</option>
+                                                <option value="daily" selected>每日摘要</option>
+                                                <option value="weekly">每週摘要</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <h5 style="margin-top: var(--spacing-md);">通知項目設定</h5>
+                                <div class="table-responsive">
+                                    <table class="table-settings">
+                                        <thead>
+                                            <tr>
+                                                <th>通知項目</th>
+                                                <th>系統通知</th>
+                                                <th>電子郵件</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>請假申請通知</td>
+                                                <td>
+                                                    <input type="checkbox" checked>
+                                                </td>
+                                                <td>
+                                                    <input type="checkbox" checked>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>請假審核結果通知</td>
+                                                <td>
+                                                    <input type="checkbox" checked>
+                                                </td>
+                                                <td>
+                                                    <input type="checkbox" checked>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>出勤異常通知</td>
+                                                <td>
+                                                    <input type="checkbox" checked>
+                                                </td>
+                                                <td>
+                                                    <input type="checkbox" checked>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>加班申請通知</td>
+                                                <td>
+                                                    <input type="checkbox" checked>
+                                                </td>
+                                                <td>
+                                                    <input type="checkbox" checked>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>薪資單發放通知</td>
+                                                <td>
+                                                    <input type="checkbox" checked>
+                                                </td>
+                                                <td>
+                                                    <input type="checkbox" checked>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>公告發布通知</td>
+                                                <td>
+                                                    <input type="checkbox" checked>
+                                                </td>
+                                                <td>
+                                                    <input type="checkbox" checked>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>系統維護通知</td>
+                                                <td>
+                                                    <input type="checkbox" checked>
+                                                </td>
+                                                <td>
+                                                    <input type="checkbox" checked>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-outline-secondary">重設為預設值</button>
+                                    <button type="button" class="btn btn-primary">儲存變更</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Backup and Data Management Tab -->
+                        <div id="backup" class="tab-content">
+                            <div class="settings-section">
+                                <h4><i class="fas fa-database"></i> 資料備份設定</h4>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="backup-frequency">自動備份頻率</label>
+                                            <select id="backup-frequency" class="form-control">
+                                                <option value="daily" selected>每日</option>
+                                                <option value="weekly">每週</option>
+                                                <option value="monthly">每月</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="backup-time">備份時間</label>
+                                            <input type="time" id="backup-time" value="01:00" class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="backup-retention">備份保留時間</label>
+                                            <select id="backup-retention" class="form-control">
+                                                <option value="7">7 天</option>
+                                                <option value="14">14 天</option>
+                                                <option value="30" selected>30 天</option>
+                                                <option value="90">90 天</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="backup-storage">備份儲存位置</label>
+                                            <select id="backup-storage" class="form-control">
+                                                <option value="local" selected>本地伺服器</option>
+                                                <option value="network">網路儲存</option>
+                                                <option value="cloud">雲端儲存</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" checked> 啟用自動備份
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" checked> 備份完成後寄送通知
+                                    </label>
+                                </div>
+                                
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-secondary"><i class="fas fa-database"></i> 立即備份</button>
+                                    <button type="button" class="btn btn-primary">儲存設定</button>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-section">
+                                <h4><i class="fas fa-history"></i> 備份歷史記錄</h4>
+                                <div class="table-responsive">
+                                    <table class="table-settings">
+                                        <thead>
+                                            <tr>
+                                                <th>備份時間</th>
+                                                <th>備份類型</th>
+                                                <th>檔案大小</th>
+                                                <th>狀態</th>
+                                                <th>動作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>2023-06-15 01:00</td>
+                                                <td>自動備份</td>
+                                                <td>256 MB</td>
+                                                <td><span class="badge badge-success">成功</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-info"><i class="fas fa-download"></i></button>
+                                                    <button class="btn btn-sm btn-secondary"><i class="fas fa-undo"></i></button>
+                                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>2023-06-14 01:00</td>
+                                                <td>自動備份</td>
+                                                <td>255 MB</td>
+                                                <td><span class="badge badge-success">成功</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-info"><i class="fas fa-download"></i></button>
+                                                    <button class="btn btn-sm btn-secondary"><i class="fas fa-undo"></i></button>
+                                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>2023-06-13 15:30</td>
+                                                <td>手動備份</td>
+                                                <td>254 MB</td>
+                                                <td><span class="badge badge-success">成功</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-info"><i class="fas fa-download"></i></button>
+                                                    <button class="btn btn-sm btn-secondary"><i class="fas fa-undo"></i></button>
+                                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>2023-06-13 01:00</td>
+                                                <td>自動備份</td>
+                                                <td>253 MB</td>
+                                                <td><span class="badge badge-danger">失敗</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-warning"><i class="fas fa-exclamation-triangle"></i> 查看錯誤</button>
+                                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 側邊欄收合功能
+            $('#menu-toggle').click(function() {
+                $('.sidebar').toggleClass('collapsed');
+                $('.main-content').toggleClass('expanded');
+            });
+            
+            // Tab 切換功能
+            $('.settings-tab').click(function() {
+                // 移除所有 Tab 的 active 狀態
+                $('.settings-tab').removeClass('active');
+                $(this).addClass('active');
+                
+                // 獲取要顯示的 Tab 內容 ID
+                const tabId = $(this).data('tab');
+                
+                // 隱藏所有 Tab 內容，顯示選中的 Tab 內容
+                $('.tab-content').removeClass('active');
+                $('#' + tabId).addClass('active');
+            });
+            
+            // 表單提交處理
+            $('form').submit(function(e) {
+                e.preventDefault();
+                alert('設定已儲存');
+            });
+            
+            // 按鈕點擊事件
+            $('.btn-primary').click(function() {
+                // 如果按鈕裡有「新增」文字，則顯示新增表單；否則儲存設定
+                if ($(this).text().includes('新增')) {
+                    alert('開啟新增表單');
+                } else {
+                    alert('設定已儲存');
+                }
+            });
+            
+            // 其他按鈕點擊事件
+            $('.btn-danger').click(function() {
+                if ($(this).find('.fa-trash').length > 0) {
+                    if (confirm('確定要刪除嗎？')) {
+                        alert('已刪除');
+                    }
+                } else if ($(this).find('.fa-lock').length > 0) {
+                    if (confirm('確定要停用此使用者嗎？')) {
+                        alert('使用者已停用');
+                    }
+                }
+            });
+            
+            $('.btn-success').click(function() {
+                if ($(this).find('.fa-unlock').length > 0) {
+                    if (confirm('確定要啟用此使用者嗎？')) {
+                        alert('使用者已啟用');
+                    }
+                }
+            });
+            
+            $('.btn-secondary').click(function() {
+                if ($(this).find('.fa-database').length > 0) {
+                    if (confirm('確定要立即進行系統備份嗎？')) {
+                        alert('備份程序已啟動，請稍候...');
+                    }
+                } else if ($(this).find('.fa-undo').length > 0) {
+                    if (confirm('警告：還原備份將會覆蓋目前的資料，確定要繼續嗎？')) {
+                        alert('還原程序已啟動，系統將在完成後重新啟動');
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

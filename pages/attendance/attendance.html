@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>勤惰管理</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/dashboard.css">
+    <style>
+        .attendance-card {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--spacing-lg);
+            overflow: hidden;
+        }
+        
+        .attendance-card-header {
+            background-color: var(--bg-light);
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .attendance-card-body {
+            padding: var(--spacing-md);
+        }
+        
+        .attendance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-md);
+        }
+        
+        .attendance-menu-item {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-md);
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 180px;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+        
+        .attendance-menu-item:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .attendance-menu-item i {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-md);
+            color: var(--primary-color);
+        }
+        
+        .attendance-menu-item h3 {
+            margin-bottom: var(--spacing-xs);
+            font-size: var(--font-size-lg);
+        }
+        
+        .attendance-menu-item p {
+            color: var(--text-light);
+            font-size: var(--font-size-sm);
+            margin: 0;
+        }
+        
+        .summary-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .summary-card {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-md);
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+        }
+        
+        .summary-card.present {
+            border-top: 3px solid var(--success-color);
+        }
+        
+        .summary-card.absent {
+            border-top: 3px solid var(--danger-color);
+        }
+        
+        .summary-card.leave {
+            border-top: 3px solid var(--warning-color);
+        }
+        
+        .summary-card.late {
+            border-top: 3px solid var(--accent-color);
+        }
+        
+        .summary-number {
+            font-size: 2rem;
+            font-weight: 600;
+            margin: var(--spacing-sm) 0;
+        }
+        
+        .summary-label {
+            color: var(--text-light);
+            font-size: var(--font-size-sm);
+        }
+        
+        .summary-icon {
+            font-size: 1.5rem;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .present .summary-icon {
+            color: var(--success-color);
+        }
+        
+        .absent .summary-icon {
+            color: var(--danger-color);
+        }
+        
+        .leave .summary-icon {
+            color: var(--warning-color);
+        }
+        
+        .late .summary-icon {
+            color: var(--accent-color);
+        }
+        
+        @media (max-width: 992px) {
+            .summary-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .summary-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img alt="" src="../../assets/images/demo.png" />
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="../../index.html"><i class="fas fa-tachometer-alt"></i>儀表板</a>
+                    </li>
+                    <li>
+                        <a href="../employees/employee-list.html"><i class="fas fa-users"></i>員工管理</a>
+                    </li>
+                    <li>
+                        <a href="../organization/org-chart.html"><i class="fas fa-sitemap"></i>組織架構</a>
+                    </li>
+                    <li class="active">
+                        <a href="attendance.html"><i class="fas fa-calendar-check"></i>勤惰管理</a>
+                    </li>
+                    <li>
+                        <a href="../payroll/payroll.html"><i class="fas fa-money-bill-wave"></i>薪資與獎金</a>
+                    </li>
+                    <li>
+                        <a href="../announcement/announcements.html"><i class="fas fa-bullhorn"></i>公布欄</a>
+                    </li>
+                    <li>
+                        <a href="../reports/reports.html"><i class="fas fa-chart-bar"></i>報表中心</a>
+                    </li>
+                    <li>
+                        <a href="../settings/settings.html"><i class="fas fa-cog"></i>系統設定</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <span class="user-info">
+                    <img src="../../assets/images/user-avatar.jpg" alt="使用者頭像" class="avatar">
+                    <span class="user-name">王小明</span>
+                    <span class="user-role">HR專員</span>
+                </span>
+                <a href="../../login.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2>勤惰管理</h2>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <input type="text" placeholder="搜尋...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <div class="messages">
+                        <i class="fas fa-envelope"></i>
+                        <span class="badge">5</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <!-- 今日勤惰摘要 -->
+                <div class="attendance-card">
+                    <div class="attendance-card-header">
+                        <h3><i class="fas fa-user-clock"></i> 今日勤惰摘要 (2023/06/15)</h3>
+                        <div class="header-actions">
+                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-sync-alt"></i> 重新整理</button>
+                        </div>
+                    </div>
+                    <div class="attendance-card-body">
+                        <div class="summary-container">
+                            <div class="summary-card present">
+                                <div class="summary-icon"><i class="fas fa-user-check"></i></div>
+                                <div class="summary-number">42</div>
+                                <div class="summary-label">出勤人數</div>
+                            </div>
+                            <div class="summary-card absent">
+                                <div class="summary-icon"><i class="fas fa-user-times"></i></div>
+                                <div class="summary-number">3</div>
+                                <div class="summary-label">缺勤人數</div>
+                            </div>
+                            <div class="summary-card leave">
+                                <div class="summary-icon"><i class="fas fa-user-clock"></i></div>
+                                <div class="summary-number">5</div>
+                                <div class="summary-label">請假人數</div>
+                            </div>
+                            <div class="summary-card late">
+                                <div class="summary-icon"><i class="fas fa-hourglass-half"></i></div>
+                                <div class="summary-number">2</div>
+                                <div class="summary-label">遲到人數</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 勤惰管理功能區 -->
+                <div class="attendance-card">
+                    <div class="attendance-card-header">
+                        <h3><i class="fas fa-th-large"></i> 勤惰管理功能</h3>
+                    </div>
+                    <div class="attendance-card-body">
+                        <div class="attendance-grid">
+                            <a href="attendance-management.html" class="attendance-menu-item">
+                                <i class="fas fa-calendar-day"></i>
+                                <h3>出勤管理</h3>
+                                <p>查看和管理員工出勤記錄</p>
+                            </a>
+                            <a href="attendance-record.html" class="attendance-menu-item">
+                                <i class="fas fa-clipboard-list"></i>
+                                <h3>出勤記錄</h3>
+                                <p>查詢個人與部門出勤記錄</p>
+                            </a>
+                            <a href="leave-application.html" class="attendance-menu-item">
+                                <i class="fas fa-calendar-plus"></i>
+                                <h3>請假申請</h3>
+                                <p>申請各類型請假與查詢審核狀態</p>
+                            </a>
+                            <a href="#" class="attendance-menu-item">
+                                <i class="fas fa-business-time"></i>
+                                <h3>加班申請</h3>
+                                <p>申請加班與查詢加班記錄</p>
+                            </a>
+                            <a href="#" class="attendance-menu-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <h3>班表管理</h3>
+                                <p>輪班制度設置與班表編輯</p>
+                            </a>
+                            <a href="#" class="attendance-menu-item">
+                                <i class="fas fa-chart-pie"></i>
+                                <h3>勤惰統計</h3>
+                                <p>各類勤惰數據分析與統計圖表</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 待處理事項 -->
+                <div class="attendance-card">
+                    <div class="attendance-card-header">
+                        <h3><i class="fas fa-tasks"></i> 待處理勤惰事項</h3>
+                        <a href="#" class="more-link">查看全部</a>
+                    </div>
+                    <div class="attendance-card-body">
+                        <div class="card-body">
+                            <ul class="todo-items">
+                                <li class="todo-item high">
+                                    <div class="todo-info">
+                                        <span class="todo-title">審核陳小華的請假申請</span>
+                                        <span class="todo-date">今天 14:30 前</span>
+                                    </div>
+                                    <div class="todo-actions">
+                                        <button class="btn-sm">處理</button>
+                                    </div>
+                                </li>
+                                <li class="todo-item medium">
+                                    <div class="todo-info">
+                                        <span class="todo-title">處理李大強的加班申請</span>
+                                        <span class="todo-date">明天 10:00 前</span>
+                                    </div>
+                                    <div class="todo-actions">
+                                        <button class="btn-sm">處理</button>
+                                    </div>
+                                </li>
+                                <li class="todo-item low">
+                                    <div class="todo-info">
+                                        <span class="todo-title">更新7月份班表</span>
+                                        <span class="todo-date">6月20日 前</span>
+                                    </div>
+                                    <div class="todo-actions">
+                                        <button class="btn-sm">處理</button>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 側邊欄收合功能
+            $('#menu-toggle').click(function() {
+                $('.sidebar').toggleClass('collapsed');
+                $('.main-content').toggleClass('expanded');
+            });
+
+            // 日期顯示
+            const today = new Date();
+            const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+            const weekdayOptions = { weekday: 'long' };
+            const dateStr = today.toLocaleDateString('zh-TW', dateOptions);
+            const weekdayStr = today.toLocaleDateString('zh-TW', weekdayOptions);
+        });
+    </script>
+</body>
+</html> 

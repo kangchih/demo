@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XX旅行社 - 人力資源管理系統</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+    <style>
+        /* Fix for bottom cards layout */
+        .event-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--spacing-md);
+        }
+        
+        .event-item {
+            display: flex;
+            align-items: center;
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-sm);
+            box-shadow: var(--shadow-sm);
+            padding: var(--spacing-sm);
+            transition: all var(--transition-fast);
+            height: 100%;
+        }
+        
+        .event-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .event-date {
+            background-color: var(--primary-color);
+            color: var(--text-white);
+            border-radius: var(--border-radius-sm);
+            width: 60px;
+            height: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-right: var(--spacing-md);
+            flex-shrink: 0;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .event-date .day {
+            font-size: 1.5rem;
+            font-weight: 600;
+            line-height: 1;
+        }
+        
+        .event-date .month {
+            font-size: 0.8rem;
+        }
+        
+        .event-details {
+            flex: 1;
+        }
+        
+        .event-details h4 {
+            margin-bottom: var(--spacing-xs);
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        .event-details p {
+            color: var(--text-light);
+            margin: var(--spacing-xs) 0;
+            font-size: var(--font-size-sm);
+        }
+        
+        .event-details p i {
+            margin-right: 5px;
+            color: var(--primary-color);
+            width: 14px;
+        }
+        
+        /* Reports list styling */
+        .reports-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--spacing-md);
+        }
+        
+        .report-item {
+            display: flex;
+            align-items: center;
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-sm);
+            box-shadow: var(--shadow-sm);
+            padding: var(--spacing-sm);
+            transition: all var(--transition-fast);
+        }
+        
+        .report-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .report-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--border-radius-sm);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: var(--spacing-md);
+            flex-shrink: 0;
+            font-size: 1.5rem;
+            box-shadow: var(--shadow-xs);
+        }
+        
+        .report-icon.pdf {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+        
+        .report-icon.excel {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+        
+        .report-details {
+            flex: 1;
+        }
+        
+        .report-details h4 {
+            margin-bottom: var(--spacing-xs);
+            font-weight: 600;
+        }
+        
+        .report-details p {
+            color: var(--text-light);
+            margin: 0;
+            font-size: var(--font-size-sm);
+        }
+        
+        .report-details p i {
+            margin-right: 5px;
+            color: var(--primary-color);
+        }
+        
+        .report-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        
+        .report-actions .btn-sm {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--primary-color);
+            color: var(--text-white);
+            border: none;
+            cursor: pointer;
+            transition: background-color var(--transition-fast);
+        }
+        
+        .report-actions .btn-sm:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Dashboard Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--spacing-md);
+        }
+
+        .dashboard-grid .dashboard-card {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow var(--transition-fast);
+            overflow: hidden;
+        }
+
+        .dashboard-grid .dashboard-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .dashboard-grid .todo-list {
+            grid-column: span 4;
+        }
+
+        .dashboard-grid .attendance-overview {
+            grid-column: span 4;
+        }
+
+        .dashboard-grid .announcements {
+            grid-column: span 4;
+        }
+
+        .dashboard-grid .quick-access {
+            grid-column: span 6;
+        }
+
+        .dashboard-grid .events {
+            grid-column: span 6;
+        }
+
+        .dashboard-grid .recent-reports {
+            grid-column: span 12;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-grid .todo-list,
+            .dashboard-grid .attendance-overview,
+            .dashboard-grid .announcements {
+                grid-column: span 6;
+            }
+            
+            .dashboard-grid .quick-access,
+            .dashboard-grid .events {
+                grid-column: span 12;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid .todo-list,
+            .dashboard-grid .attendance-overview,
+            .dashboard-grid .announcements,
+            .dashboard-grid .quick-access,
+            .dashboard-grid .events,
+            .dashboard-grid .recent-reports {
+                grid-column: span 12;
+            }
+            
+            .event-list,
+            .reports-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img alt="" src="assets/images/demo.png" />            
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active">
+                        <a href="index.html"><i class="fas fa-tachometer-alt"></i>儀表板</a>
+                    </li>
+                    <li>
+                        <a href="pages/employees/employee-list.html"><i class="fas fa-users"></i>員工管理</a>
+                    </li>
+                    <li>
+                        <a href="pages/organization/org-chart.html"><i class="fas fa-sitemap"></i>組織架構</a>
+                    </li>
+                    <li>
+                        <a href="pages/attendance/attendance.html"><i class="fas fa-calendar-check"></i>勤惰管理</a>
+                    </li>
+                    <li>
+                        <a href="pages/payroll/payroll.html"><i class="fas fa-money-bill-wave"></i>薪資與獎金</a>
+                    </li>
+                    <li>
+                        <a href="pages/announcement/announcements.html"><i class="fas fa-bullhorn"></i>公布欄</a>
+                    </li>
+                    <li>
+                        <a href="pages/reports/reports.html"><i class="fas fa-chart-bar"></i>報表中心</a>
+                    </li>
+                    <li>
+                        <a href="pages/settings/settings.html"><i class="fas fa-cog"></i>系統設定</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <span class="user-info">
+                    <img src="assets/images/user-avatar.jpg" alt="使用者頭像" class="avatar">
+                    <span class="user-name">王小明</span>
+                    <span class="user-role">HR專員</span>
+                </span>
+                <a href="login.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2>儀表板</h2>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <input type="text" placeholder="搜尋...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <div class="messages">
+                        <i class="fas fa-envelope"></i>
+                        <span class="badge">5</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <!-- Dashboard Content -->
+                <div class="dashboard-container">
+                    <!-- Welcome Banner -->
+                    <div class="welcome-banner">
+                        <div class="welcome-content">
+                            <h2>歡迎回來，王小明</h2>
+                            <p>今天是 <span id="current-date">2023年6月15日</span>，星期四</p>
+                        </div>
+                        <div class="quick-stats">
+                            <div class="stat-item">
+                                <span class="stat-value">12</span>
+                                <span class="stat-label">待辦事項</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">3</span>
+                                <span class="stat-label">待審核</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">8</span>
+                                <span class="stat-label">新公告</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard Grid -->
+                    <div class="dashboard-grid">
+                        <!-- Todo List -->
+                        <div class="dashboard-card todo-list">
+                            <div class="card-header">
+                                <h3><i class="fas fa-tasks"></i> 待辦事項</h3>
+                                <a href="#" class="more-link">查看全部</a>
+                            </div>
+                            <div class="card-body">
+                                <ul class="todo-items">
+                                    <li class="todo-item high">
+                                        <div class="todo-info">
+                                            <span class="todo-title">審核陳小華的請假申請</span>
+                                            <span class="todo-date">今天 14:30 前</span>
+                                        </div>
+                                        <div class="todo-actions">
+                                            <button class="btn-sm">處理</button>
+                                        </div>
+                                    </li>
+                                    <li class="todo-item medium">
+                                        <div class="todo-info">
+                                            <span class="todo-title">完成5月人員報表</span>
+                                            <span class="todo-date">明天 17:00 前</span>
+                                        </div>
+                                        <div class="todo-actions">
+                                            <button class="btn-sm">處理</button>
+                                        </div>
+                                    </li>
+                                    <li class="todo-item low">
+                                        <div class="todo-info">
+                                            <span class="todo-title">更新新進員工基本資料</span>
+                                            <span class="todo-date">6月20日 前</span>
+                                        </div>
+                                        <div class="todo-actions">
+                                            <button class="btn-sm">處理</button>
+                                        </div>
+                                    </li>
+                                    <li class="todo-item medium">
+                                        <div class="todo-info">
+                                            <span class="todo-title">檢查薪資異常報告</span>
+                                            <span class="todo-date">6月18日 前</span>
+                                        </div>
+                                        <div class="todo-actions">
+                                            <button class="btn-sm">處理</button>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Department Attendance -->
+                        <div class="dashboard-card attendance-overview">
+                            <div class="card-header">
+                                <h3><i class="fas fa-user-clock"></i> 部門出勤概況</h3>
+                                <a href="pages/attendance/attendance.html" class="more-link">詳細資料</a>
+                            </div>
+                            <div class="card-body">
+                                <div class="attendance-stats">
+                                    <div class="stat-circle present">
+                                        <span class="stat-number">42</span>
+                                        <span class="stat-text">出勤</span>
+                                    </div>
+                                    <div class="stat-circle absent">
+                                        <span class="stat-number">3</span>
+                                        <span class="stat-text">缺勤</span>
+                                    </div>
+                                    <div class="stat-circle leave">
+                                        <span class="stat-number">5</span>
+                                        <span class="stat-text">請假</span>
+                                    </div>
+                                    <div class="stat-circle late">
+                                        <span class="stat-number">2</span>
+                                        <span class="stat-text">遲到</span>
+                                    </div>
+                                </div>
+                                <div class="attendance-chart">
+                                    <canvas id="attendanceChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Announcements -->
+                        <div class="dashboard-card announcements">
+                            <div class="card-header">
+                                <h3><i class="fas fa-bullhorn"></i> 最新公告</h3>
+                                <a href="pages/announcement/announcements.html" class="more-link">所有公告</a>
+                            </div>
+                            <div class="card-body">
+                                <div class="announcement-item important">
+                                    <div class="announcement-header">
+                                        <h4>2023年度員工健康檢查通知</h4>
+                                        <span class="date">2023/06/10</span>
+                                    </div>
+                                    <p>依照公司政策，所有員工必須於7月底前完成年度健康檢查，請各部門主管協助安排...</p>
+                                    <div class="announcement-footer">
+                                        <span class="badge important">重要</span>
+                                        <a href="pages/announcement/announcements.html" class="read-more">閱讀更多</a>
+                                    </div>
+                                </div>
+                                <div class="announcement-item">
+                                    <div class="announcement-header">
+                                        <h4>人資系統功能更新公告</h4>
+                                        <span class="date">2023/06/08</span>
+                                    </div>
+                                    <p>為提升使用體驗，人資系統將於6月25日進行功能更新，新增多項報表功能及優化介面...</p>
+                                    <div class="announcement-footer">
+                                        <span class="badge system">系統</span>
+                                        <a href="pages/announcement/announcements.html" class="read-more">閱讀更多</a>
+                                    </div>
+                                </div>
+                                <div class="announcement-item">
+                                    <div class="announcement-header">
+                                        <h4>端午節福利發放通知</h4>
+                                        <span class="date">2023/06/05</span>
+                                    </div>
+                                    <p>2023年端午節禮金將於6月15日隨薪資一併發放，請各位同仁留意帳戶入帳情況...</p>
+                                    <div class="announcement-footer">
+                                        <span class="badge benefit">福利</span>
+                                        <a href="pages/announcement/announcements.html" class="read-more">閱讀更多</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Access -->
+                        <div class="dashboard-card quick-access">
+                            <div class="card-header">
+                                <h3><i class="fas fa-bolt"></i> 快速功能</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="quick-access-grid">
+                                    <a href="pages/attendance/attendance.html" class="quick-access-item">
+                                        <i class="fas fa-calendar-plus"></i>
+                                        <span>請假申請</span>
+                                    </a>
+                                    <a href="pages/attendance/attendance.html" class="quick-access-item">
+                                        <i class="fas fa-business-time"></i>
+                                        <span>加班申請</span>
+                                    </a>
+                                    <a href="pages/employees/employee-list.html" class="quick-access-item">
+                                        <i class="fas fa-address-book"></i>
+                                        <span>員工目錄</span>
+                                    </a>
+                                    <a href="pages/payroll/payroll.html" class="quick-access-item">
+                                        <i class="fas fa-file-invoice-dollar"></i>
+                                        <span>薪資查詢</span>
+                                    </a>
+                                    <a href="pages/reports/reports.html" class="quick-access-item">
+                                        <i class="fas fa-chart-bar"></i>
+                                        <span>績效報表</span>
+                                    </a>
+                                    <a href="pages/organization/org-chart.html" class="quick-access-item">
+                                        <i class="fas fa-sitemap"></i>
+                                        <span>組織架構</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upcoming Events -->
+                        <div class="dashboard-card events">
+                            <div class="card-header">
+                                <h3><i class="fas fa-calendar-alt"></i> 近期活動</h3>
+                                <a href="#" class="more-link">查看行事曆</a>
+                            </div>
+                            <div class="card-body">
+                                <div class="event-list">
+                                    <div class="event-item">
+                                        <div class="event-date">
+                                            <span class="day">18</span>
+                                            <span class="month">六月</span>
+                                        </div>
+                                        <div class="event-details">
+                                            <h4>新進員工教育訓練</h4>
+                                            <p><i class="fas fa-map-marker-alt"></i> 總部大樓 第三會議室</p>
+                                            <p><i class="fas fa-clock"></i> 09:00 - 17:00</p>
+                                        </div>
+                                    </div>
+                                    <div class="event-item">
+                                        <div class="event-date">
+                                            <span class="day">22</span>
+                                            <span class="month">六月</span>
+                                        </div>
+                                        <div class="event-details">
+                                            <h4>6月部門主管會議</h4>
+                                            <p><i class="fas fa-map-marker-alt"></i> 總部大樓 第一會議室</p>
+                                            <p><i class="fas fa-clock"></i> 14:00 - 16:00</p>
+                                        </div>
+                                    </div>
+                                    <div class="event-item">
+                                        <div class="event-date">
+                                            <span class="day">25</span>
+                                            <span class="month">六月</span>
+                                        </div>
+                                        <div class="event-details">
+                                            <h4>系統維護時間</h4>
+                                            <p><i class="fas fa-map-marker-alt"></i> 線上系統</p>
+                                            <p><i class="fas fa-clock"></i> 18:00 - 20:00</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Reports -->
+                        <div class="dashboard-card recent-reports">
+                            <div class="card-header">
+                                <h3><i class="fas fa-file-alt"></i> 最近產生的報表</h3>
+                                <a href="pages/reports/reports.html" class="more-link">所有報表</a>
+                            </div>
+                            <div class="card-body">
+                                <div class="reports-list">
+                                    <div class="report-item">
+                                        <div class="report-icon pdf">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </div>
+                                        <div class="report-details">
+                                            <h4>5月薪資發放明細表</h4>
+                                            <p><i class="fas fa-clock"></i> 2023/06/05 產生</p>
+                                        </div>
+                                        <div class="report-actions">
+                                            <a href="#" class="btn-sm"><i class="fas fa-download"></i></a>
+                                        </div>
+                                    </div>
+                                    <div class="report-item">
+                                        <div class="report-icon excel">
+                                            <i class="fas fa-file-excel"></i>
+                                        </div>
+                                        <div class="report-details">
+                                            <h4>5月出勤統計表</h4>
+                                            <p><i class="fas fa-clock"></i> 2023/06/03 產生</p>
+                                        </div>
+                                        <div class="report-actions">
+                                            <a href="#" class="btn-sm"><i class="fas fa-download"></i></a>
+                                        </div>
+                                    </div>
+                                    <div class="report-item">
+                                        <div class="report-icon pdf">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </div>
+                                        <div class="report-details">
+                                            <h4>5月各部門加班統計</h4>
+                                            <p><i class="fas fa-clock"></i> 2023/06/01 產生</p>
+                                        </div>
+                                        <div class="report-actions">
+                                            <a href="#" class="btn-sm"><i class="fas fa-download"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 側邊欄收合功能
+            $('#menu-toggle').click(function() {
+                $('.sidebar').toggleClass('collapsed');
+                $('.main-content').toggleClass('expanded');
+            });
+            
+            // 設定當前日期
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            $('#current-date').text(now.toLocaleDateString('zh-TW', options));
+            
+            // 出勤圖表
+            const attendanceChart = new Chart(
+                document.getElementById('attendanceChart'),
+                {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['出勤', '缺勤', '請假', '遲到'],
+                        datasets: [{
+                            data: [42, 3, 5, 2],
+                            backgroundColor: [
+                                'rgba(54, 162, 235, 0.8)',
+                                'rgba(255, 99, 132, 0.8)',
+                                'rgba(255, 206, 86, 0.8)',
+                                'rgba(255, 159, 64, 0.8)'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        cutout: '70%'
+                    }
+                }
+            );
+        });
+    </script>
+</body>
+</html> 

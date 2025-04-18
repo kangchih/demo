@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>薪資與獎金 - DEMO HRMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/dashboard.css">
+    <style>
+        .payroll-card {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--spacing-lg);
+            overflow: hidden;
+        }
+        
+        .payroll-card-header {
+            background-color: var(--bg-light);
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .payroll-card-body {
+            padding: var(--spacing-md);
+        }
+        
+        .payroll-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-md);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .filter-label {
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .filter-select,
+        .filter-input {
+            padding: 0.4rem 0.6rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            min-width: 120px;
+        }
+        
+        .search-filter {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            padding: 0 var(--spacing-sm);
+            flex: 1;
+        }
+        
+        .search-filter input {
+            border: none;
+            padding: 0.4rem;
+            width: 100%;
+            outline: none;
+        }
+        
+        .search-filter i {
+            color: var(--text-light);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .stats-card {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-md);
+            display: flex;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+            transition: transform var(--transition-fast);
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: var(--spacing-md);
+            flex-shrink: 0;
+            font-size: 1.5rem;
+        }
+        
+        .bg-primary-light {
+            background-color: rgba(0, 84, 61, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .bg-secondary-light {
+            background-color: rgba(0, 126, 165, 0.1);
+            color: var(--secondary-color);
+        }
+        
+        .bg-accent-light {
+            background-color: rgba(255, 130, 0, 0.1);
+            color: var(--accent-color);
+        }
+        
+        .bg-success-light {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+        }
+        
+        .stats-info h3 {
+            font-size: var(--font-size-md);
+            margin-bottom: var(--spacing-xs);
+            font-weight: 600;
+        }
+        
+        .stats-info .value {
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+        }
+        
+        .stats-info .change {
+            font-size: var(--font-size-sm);
+            color: var(--text-light);
+        }
+        
+        .change.positive {
+            color: var(--success-color);
+        }
+        
+        .change.negative {
+            color: var(--danger-color);
+        }
+        
+        .payroll-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .payroll-menu-item {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-md);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: flex-start;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+        }
+        
+        .payroll-menu-item:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .menu-icon {
+            font-size: 2rem;
+            margin-right: var(--spacing-md);
+            color: var(--primary-color);
+        }
+        
+        .menu-content h3 {
+            font-size: var(--font-size-lg);
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .menu-content p {
+            color: var(--text-light);
+            font-size: var(--font-size-sm);
+            margin: 0;
+        }
+        
+        .recent-payslips {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .recent-payslips th,
+        .recent-payslips td {
+            padding: var(--spacing-sm);
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .recent-payslips th {
+            font-weight: 600;
+            background-color: var(--bg-light);
+            color: var(--text-color);
+        }
+        
+        .recent-payslips tr:hover {
+            background-color: var(--bg-lighter);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            font-size: var(--font-size-xs);
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+        
+        .status-processed {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+        }
+        
+        .status-paid {
+            background-color: rgba(0, 126, 165, 0.1);
+            color: var(--secondary-color);
+        }
+        
+        .view-btn {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-size: var(--font-size-sm);
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+        
+        .view-btn:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .payroll-filters {
+                flex-direction: column;
+            }
+            
+            .filter-group {
+                width: 100%;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img alt="" src="../../assets/images/demo.png" />
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="../../index.html"><i class="fas fa-tachometer-alt"></i>儀表板</a>
+                    </li>
+                    <li>
+                        <a href="../employees/employee-list.html"><i class="fas fa-users"></i>員工管理</a>
+                    </li>
+                    <li>
+                        <a href="../organization/org-chart.html"><i class="fas fa-sitemap"></i>組織架構</a>
+                    </li>
+                    <li>
+                        <a href="../attendance/attendance.html"><i class="fas fa-calendar-check"></i>勤惰管理</a>
+                    </li>
+                    <li class="active">
+                        <a href="payroll.html"><i class="fas fa-money-bill-wave"></i>薪資與獎金</a>
+                    </li>
+                    <li>
+                        <a href="../announcement/announcements.html"><i class="fas fa-bullhorn"></i>公布欄</a>
+                    </li>
+                    <li>
+                        <a href="../reports/reports.html"><i class="fas fa-chart-bar"></i>報表中心</a>
+                    </li>
+                    <li>
+                        <a href="../settings/settings.html"><i class="fas fa-cog"></i>系統設定</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <span class="user-info">
+                    <img src="../../assets/images/user-avatar.jpg" alt="使用者頭像" class="avatar">
+                    <span class="user-name">王小明</span>
+                    <span class="user-role">HR專員</span>
+                </span>
+                <a href="../../login.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2>薪資與獎金</h2>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <input type="text" placeholder="搜尋...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <div class="messages">
+                        <i class="fas fa-envelope"></i>
+                        <span class="badge">5</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <!-- 薪資管理篩選器 -->
+                <div class="payroll-filters">
+                    <div class="filter-group">
+                        <span class="filter-label">月份:</span>
+                        <input type="month" class="filter-input" value="2023-06">
+                    </div>
+                    <div class="filter-group">
+                        <span class="filter-label">部門:</span>
+                        <select class="filter-select">
+                            <option value="all">全部部門</option>
+                            <option value="hr">人資部</option>
+                            <option value="cabin">業務組</option>
+                            <option value="eng">工程部</option>
+                            <option value="ops">營運部</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <span class="filter-label">狀態:</span>
+                        <select class="filter-select">
+                            <option value="all">全部狀態</option>
+                            <option value="pending">待處理</option>
+                            <option value="processed">已處理</option>
+                            <option value="paid">已發放</option>
+                        </select>
+                    </div>
+                    <div class="search-filter">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="搜尋員工...">
+                    </div>
+                </div>
+
+                <!-- 薪資統計 -->
+                <div class="stats-grid">
+                    <div class="stats-card">
+                        <div class="stats-icon bg-primary-light">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="stats-info">
+                            <h3>本月薪資總額</h3>
+                            <div class="value">$2,785,340</div>
+                            <div class="change positive">+2.3% <i class="fas fa-arrow-up"></i></div>
+                        </div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-icon bg-secondary-light">
+                            <i class="fas fa-user-friends"></i>
+                        </div>
+                        <div class="stats-info">
+                            <h3>員工人數</h3>
+                            <div class="value">104</div>
+                            <div class="change positive">+3 <i class="fas fa-arrow-up"></i></div>
+                        </div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-icon bg-accent-light">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stats-info">
+                            <h3>本月加班時數</h3>
+                            <div class="value">324 小時</div>
+                            <div class="change negative">-12.5% <i class="fas fa-arrow-down"></i></div>
+                        </div>
+                    </div>
+                    <div class="stats-card">
+                        <div class="stats-icon bg-success-light">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="stats-info">
+                            <h3>本月獎金發放</h3>
+                            <div class="value">$542,800</div>
+                            <div class="change positive">+15.2% <i class="fas fa-arrow-up"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 薪資功能選單 -->
+                <div class="payroll-card">
+                    <div class="payroll-card-header">
+                        <h3><i class="fas fa-th-large"></i> 薪資管理功能</h3>
+                    </div>
+                    <div class="payroll-card-body">
+                        <div class="payroll-menu">
+                            <a href="#" class="payroll-menu-item">
+                                <div class="menu-icon">
+                                    <i class="fas fa-calculator"></i>
+                                </div>
+                                <div class="menu-content">
+                                    <h3>薪資計算</h3>
+                                    <p>計算月薪、加班費、獎金等薪資項目</p>
+                                </div>
+                            </a>
+                            <a href="#" class="payroll-menu-item">
+                                <div class="menu-icon">
+                                    <i class="fas fa-file-invoice-dollar"></i>
+                                </div>
+                                <div class="menu-content">
+                                    <h3>薪資單生成</h3>
+                                    <p>產生並檢視薪資單及薪資匯出</p>
+                                </div>
+                            </a>
+                            <a href="#" class="payroll-menu-item">
+                                <div class="menu-icon">
+                                    <i class="fas fa-award"></i>
+                                </div>
+                                <div class="menu-content">
+                                    <h3>獎金管理</h3>
+                                    <p>管理年終、績效及各類獎金發放</p>
+                                </div>
+                            </a>
+                            <a href="#" class="payroll-menu-item">
+                                <div class="menu-icon">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <div class="menu-content">
+                                    <h3>保險管理</h3>
+                                    <p>管理勞保、健保、團保等相關事項</p>
+                                </div>
+                            </a>
+                            <a href="#" class="payroll-menu-item">
+                                <div class="menu-icon">
+                                    <i class="fas fa-piggy-bank"></i>
+                                </div>
+                                <div class="menu-content">
+                                    <h3>退休金提撥</h3>
+                                    <p>管理勞工退休金及提撥事項</p>
+                                </div>
+                            </a>
+                            <a href="#" class="payroll-menu-item">
+                                <div class="menu-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="menu-content">
+                                    <h3>薪資分析</h3>
+                                    <p>薪資趨勢分析及薪資結構報表</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 近期薪資發放記錄 -->
+                <div class="payroll-card">
+                    <div class="payroll-card-header">
+                        <h3><i class="fas fa-history"></i> 近期薪資發放記錄</h3>
+                        <a href="#" class="more-link">查看全部</a>
+                    </div>
+                    <div class="payroll-card-body">
+                        <div class="table-responsive">
+                            <table class="recent-payslips">
+                                <thead>
+                                    <tr>
+                                        <th>發放月份</th>
+                                        <th>薪資項目</th>
+                                        <th>發放日期</th>
+                                        <th>發放金額</th>
+                                        <th>發放人數</th>
+                                        <th>狀態</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>2023-06</td>
+                                        <td>月薪</td>
+                                        <td>2023-06-05</td>
+                                        <td>$2,785,340</td>
+                                        <td>104</td>
+                                        <td><span class="status-badge status-pending">待處理</span></td>
+                                        <td><a href="#" class="view-btn"><i class="fas fa-eye"></i> 查看</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td>2023-05</td>
+                                        <td>月薪</td>
+                                        <td>2023-05-05</td>
+                                        <td>$2,765,120</td>
+                                        <td>101</td>
+                                        <td><span class="status-badge status-paid">已發放</span></td>
+                                        <td><a href="#" class="view-btn"><i class="fas fa-eye"></i> 查看</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td>2023-04</td>
+                                        <td>月薪</td>
+                                        <td>2023-04-05</td>
+                                        <td>$2,720,850</td>
+                                        <td>100</td>
+                                        <td><span class="status-badge status-paid">已發放</span></td>
+                                        <td><a href="#" class="view-btn"><i class="fas fa-eye"></i> 查看</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td>2023-03</td>
+                                        <td>月薪</td>
+                                        <td>2023-03-05</td>
+                                        <td>$2,710,250</td>
+                                        <td>100</td>
+                                        <td><span class="status-badge status-paid">已發放</span></td>
+                                        <td><a href="#" class="view-btn"><i class="fas fa-eye"></i> 查看</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td>2023-02</td>
+                                        <td>年終獎金</td>
+                                        <td>2023-02-10</td>
+                                        <td>$4,120,000</td>
+                                        <td>98</td>
+                                        <td><span class="status-badge status-paid">已發放</span></td>
+                                        <td><a href="#" class="view-btn"><i class="fas fa-eye"></i> 查看</a></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 側邊欄收合功能
+            $('#menu-toggle').click(function() {
+                $('.sidebar').toggleClass('collapsed');
+                $('.main-content').toggleClass('expanded');
+            });
+        });
+    </script>
+</body>
+</html> 

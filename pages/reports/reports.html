@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>報表中心 - DEMO HRMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/dashboard.css">
+    <style>
+        .report-card {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--spacing-lg);
+            overflow: hidden;
+        }
+        
+        .report-card-header {
+            background-color: var(--bg-light);
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .report-card-body {
+            padding: var(--spacing-md);
+        }
+        
+        .report-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-md);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .filter-label {
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .filter-select,
+        .filter-input {
+            padding: 0.4rem 0.6rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            min-width: 120px;
+        }
+        
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .report-item {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: var(--spacing-md);
+            border-left: 4px solid var(--primary-color);
+            transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+        
+        .report-item:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .report-item.attendance {
+            border-left-color: var(--primary-color);
+        }
+        
+        .report-item.employee {
+            border-left-color: var(--secondary-color);
+        }
+        
+        .report-item.payroll {
+            border-left-color: var(--accent-color);
+        }
+        
+        .report-item.performance {
+            border-left-color: var(--success-color);
+        }
+        
+        .report-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-md);
+            color: var(--primary-color);
+        }
+        
+        .report-item.attendance .report-icon {
+            color: var(--primary-color);
+        }
+        
+        .report-item.employee .report-icon {
+            color: var(--secondary-color);
+        }
+        
+        .report-item.payroll .report-icon {
+            color: var(--accent-color);
+        }
+        
+        .report-item.performance .report-icon {
+            color: var(--success-color);
+        }
+        
+        .report-title {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .report-description {
+            color: var(--text-light);
+            font-size: var(--font-size-sm);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .report-meta {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: var(--font-size-xs);
+            color: var(--text-light);
+        }
+        
+        .report-meta .date {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            margin: var(--spacing-md) 0;
+            background-color: var(--bg-light);
+            border-radius: var(--border-radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+        }
+        
+        .recent-reports {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .recent-reports th,
+        .recent-reports td {
+            padding: var(--spacing-sm);
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .recent-reports th {
+            font-weight: 600;
+            background-color: var(--bg-light);
+            color: var(--text-color);
+        }
+        
+        .recent-reports tr:hover {
+            background-color: var(--bg-lighter);
+        }
+        
+        .recent-reports .btn-action {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-size: var(--font-size-sm);
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+        
+        .recent-reports .btn-action:hover {
+            text-decoration: underline;
+        }
+        
+        .report-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .report-tab {
+            padding: var(--spacing-sm) var(--spacing-md);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            font-weight: 500;
+            color: var(--text-light);
+            transition: all var(--transition-fast);
+        }
+        
+        .report-tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .report-tab:hover:not(.active) {
+            background-color: var(--bg-light);
+        }
+        
+        @media (max-width: 768px) {
+            .report-filters {
+                flex-direction: column;
+            }
+            
+            .filter-group {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img alt="" src="../../assets/images/demo.png" />
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="../../index.html"><i class="fas fa-tachometer-alt"></i>儀表板</a>
+                    </li>
+                    <li>
+                        <a href="../employees/employee-list.html"><i class="fas fa-users"></i>員工管理</a>
+                    </li>
+                    <li>
+                        <a href="../organization/org-chart.html"><i class="fas fa-sitemap"></i>組織架構</a>
+                    </li>
+                    <li>
+                        <a href="../attendance/attendance.html"><i class="fas fa-calendar-check"></i>勤惰管理</a>
+                    </li>
+                    <li>
+                        <a href="../payroll/payroll.html"><i class="fas fa-money-bill-wave"></i>薪資與獎金</a>
+                    </li>
+                    <li>
+                        <a href="../announcement/announcements.html"><i class="fas fa-bullhorn"></i>公布欄</a>
+                    </li>
+                    <li class="active">
+                        <a href="reports.html"><i class="fas fa-chart-bar"></i>報表中心</a>
+                    </li>
+                    <li>
+                        <a href="../settings/settings.html"><i class="fas fa-cog"></i>系統設定</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <span class="user-info">
+                    <img src="../../assets/images/user-avatar.jpg" alt="使用者頭像" class="avatar">
+                    <span class="user-name">王小明</span>
+                    <span class="user-role">HR專員</span>
+                </span>
+                <a href="../../login.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2>報表中心</h2>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <input type="text" placeholder="搜尋...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <div class="messages">
+                        <i class="fas fa-envelope"></i>
+                        <span class="badge">5</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <!-- 報表篩選器 -->
+                <div class="report-filters">
+                    <div class="filter-group">
+                        <span class="filter-label">日期範圍:</span>
+                        <input type="month" class="filter-input" value="2023-06">
+                    </div>
+                    <div class="filter-group">
+                        <span class="filter-label">部門:</span>
+                        <select class="filter-select">
+                            <option value="all">全部部門</option>
+                            <option value="hr">人資部</option>
+                            <option value="cabin">業務組</option>
+                            <option value="eng">工程部</option>
+                            <option value="ops">營運部</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <span class="filter-label">報表類型:</span>
+                        <select class="filter-select">
+                            <option value="all">全部類型</option>
+                            <option value="attendance">出勤報表</option>
+                            <option value="payroll">薪資報表</option>
+                            <option value="employee">員工統計</option>
+                            <option value="performance">績效統計</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <button class="btn btn-primary"><i class="fas fa-search"></i> 查詢</button>
+                    </div>
+                </div>
+
+                <!-- 常用報表 -->
+                <div class="report-card">
+                    <div class="report-card-header">
+                        <h3><i class="fas fa-star"></i> 常用報表</h3>
+                        <div class="header-actions">
+                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-plus"></i> 自訂報表</button>
+                        </div>
+                    </div>
+                    <div class="report-card-body">
+                        <div class="report-grid">
+                            <a href="#" class="report-item attendance">
+                                <div class="report-icon">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                                <h3 class="report-title">月度出勤統計報表</h3>
+                                <p class="report-description">統計各部門員工出勤率、遲到早退、請假情況的月度彙總報表</p>
+                                <div class="report-meta">
+                                    <span class="date"><i class="fas fa-clock"></i> 上次產生: 2023/06/01</span>
+                                    <span class="format">PDF / Excel</span>
+                                </div>
+                            </a>
+                            <a href="#" class="report-item employee">
+                                <div class="report-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <h3 class="report-title">人員異動統計報表</h3>
+                                <p class="report-description">員工入職、離職、轉職情況的統計分析，包含人員流動率計算</p>
+                                <div class="report-meta">
+                                    <span class="date"><i class="fas fa-clock"></i> 上次產生: 2023/05/28</span>
+                                    <span class="format">PDF / Excel</span>
+                                </div>
+                            </a>
+                            <a href="#" class="report-item payroll">
+                                <div class="report-icon">
+                                    <i class="fas fa-file-invoice-dollar"></i>
+                                </div>
+                                <h3 class="report-title">薪資成本分析報表</h3>
+                                <p class="report-description">各部門薪資總額、平均薪資、加班費用等薪資成本明細與分析</p>
+                                <div class="report-meta">
+                                    <span class="date"><i class="fas fa-clock"></i> 上次產生: 2023/06/05</span>
+                                    <span class="format">PDF / Excel</span>
+                                </div>
+                            </a>
+                            <a href="#" class="report-item performance">
+                                <div class="report-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <h3 class="report-title">季度績效評估報表</h3>
+                                <p class="report-description">各部門員工績效評估結果的統計與分析，包含績效分布圖表</p>
+                                <div class="report-meta">
+                                    <span class="date"><i class="fas fa-clock"></i> 上次產生: 2023/04/15</span>
+                                    <span class="format">PDF / Excel</span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 報表分析儀表板 -->
+                <div class="report-card">
+                    <div class="report-card-header">
+                        <h3><i class="fas fa-chart-bar"></i> 報表分析儀表板</h3>
+                        <div class="report-tabs">
+                            <div class="report-tab active">出勤統計</div>
+                            <div class="report-tab">人員結構</div>
+                            <div class="report-tab">薪資分析</div>
+                            <div class="report-tab">績效評估</div>
+                        </div>
+                    </div>
+                    <div class="report-card-body">
+                        <div class="chart-container">
+                            <div>此處將顯示出勤統計圖表</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="stat-box">
+                                    <h4>本月出勤率</h4>
+                                    <div class="stat-value">96.7%</div>
+                                    <div class="stat-progress">
+                                        <div class="progress-bar" style="width: 96.7%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="stat-box">
+                                    <h4>平均請假天數</h4>
+                                    <div class="stat-value">1.8天</div>
+                                    <div class="stat-progress">
+                                        <div class="progress-bar" style="width: 18%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 最近生成的報表 -->
+                <div class="report-card">
+                    <div class="report-card-header">
+                        <h3><i class="fas fa-history"></i> 最近生成的報表</h3>
+                        <a href="#" class="more-link">查看全部</a>
+                    </div>
+                    <div class="report-card-body">
+                        <div class="table-responsive">
+                            <table class="recent-reports">
+                                <thead>
+                                    <tr>
+                                        <th>報表名稱</th>
+                                        <th>類型</th>
+                                        <th>生成時間</th>
+                                        <th>生成者</th>
+                                        <th>檔案格式</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>2023年6月員工出勤統計報表</td>
+                                        <td>出勤報表</td>
+                                        <td>2023/06/10 09:30</td>
+                                        <td>王小明</td>
+                                        <td>Excel</td>
+                                        <td>
+                                            <a href="#" class="btn-action"><i class="fas fa-download"></i> 下載</a>
+                                            <a href="#" class="btn-action"><i class="fas fa-print"></i> 列印</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>2023年Q2員工績效評估彙總</td>
+                                        <td>績效報表</td>
+                                        <td>2023/06/05 14:15</td>
+                                        <td>陳小華</td>
+                                        <td>PDF</td>
+                                        <td>
+                                            <a href="#" class="btn-action"><i class="fas fa-download"></i> 下載</a>
+                                            <a href="#" class="btn-action"><i class="fas fa-print"></i> 列印</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>2023年5月薪資發放明細報表</td>
+                                        <td>薪資報表</td>
+                                        <td>2023/06/03 16:45</td>
+                                        <td>林小芳</td>
+                                        <td>Excel</td>
+                                        <td>
+                                            <a href="#" class="btn-action"><i class="fas fa-download"></i> 下載</a>
+                                            <a href="#" class="btn-action"><i class="fas fa-print"></i> 列印</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>2023年5月加班費用統計報表</td>
+                                        <td>薪資報表</td>
+                                        <td>2023/06/02 11:20</td>
+                                        <td>林小芳</td>
+                                        <td>Excel</td>
+                                        <td>
+                                            <a href="#" class="btn-action"><i class="fas fa-download"></i> 下載</a>
+                                            <a href="#" class="btn-action"><i class="fas fa-print"></i> 列印</a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>員工人數月度變動分析報表</td>
+                                        <td>員工報表</td>
+                                        <td>2023/06/01 10:15</td>
+                                        <td>王小明</td>
+                                        <td>PDF</td>
+                                        <td>
+                                            <a href="#" class="btn-action"><i class="fas fa-download"></i> 下載</a>
+                                            <a href="#" class="btn-action"><i class="fas fa-print"></i> 列印</a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 側邊欄收合功能
+            $('#menu-toggle').click(function() {
+                $('.sidebar').toggleClass('collapsed');
+                $('.main-content').toggleClass('expanded');
+            });
+            
+            // 報表分頁切換
+            $('.report-tab').click(function() {
+                $('.report-tab').removeClass('active');
+                $(this).addClass('active');
+                // 在實際應用中，這裡可以添加切換報表內容的邏輯
+            });
+        });
+    </script>
+</body>
+</html> 

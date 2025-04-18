@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>勤惰管理系統</title>
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+  <style>
+    .calendar-container {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    
+    .calendar-header {
+      background: #f8f9fa;
+      border-radius: 8px 8px 0 0;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .calendar-body {
+      padding: 15px;
+    }
+    
+    .calendar-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 2px;
+    }
+    
+    .calendar-table th {
+      text-align: center;
+      padding: 10px;
+      background: #f8f9fa;
+    }
+    
+    .calendar-table td {
+      text-align: center;
+      padding: 10px;
+      cursor: pointer;
+      position: relative;
+      height: 80px;
+      vertical-align: top;
+    }
+    
+    .calendar-table td:hover {
+      background: #f0f0f0;
+    }
+    
+    .date-number {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      font-weight: bold;
+    }
+    
+    .attendance-status {
+      margin-top: 25px;
+      font-size: 12px;
+    }
+    
+    .attendance-status.present {
+      color: #28a745;
+    }
+    
+    .attendance-status.absent {
+      color: #dc3545;
+    }
+    
+    .attendance-status.leave {
+      color: #ffc107;
+    }
+    
+    .attendance-status.late {
+      color: #fd7e14;
+    }
+    
+    .today {
+      background: rgba(71, 169, 95, 0.1);
+      border: 2px solid #47a95f;
+    }
+    
+    .other-month {
+      color: #aaa;
+      background: #f8f9fa;
+    }
+    
+    .summary-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .attendance-form label {
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    
+    .attendance-form input,
+    .attendance-form select,
+    .attendance-form textarea {
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+        <div class="sidebar-logo">
+          <img alt="" src="../../assets/images/demo.png" />
+        </div>
+        <ul class="nav flex-column sidebar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="../../index.html">
+              <i class="bi bi-speedometer2"></i> 首頁儀表板
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../../pages/employees/employee-list.html">
+              <i class="bi bi-people"></i> 人事管理
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../../pages/organization/org-chart.html">
+              <i class="bi bi-diagram-3"></i> 組織架構
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="attendance-management.html">
+              <i class="bi bi-calendar-check"></i> 勤惰管理
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../../pages/payroll/payroll.html">
+              <i class="bi bi-cash-coin"></i> 薪資管理
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../../pages/announcement/announcements.html">
+              <i class="bi bi-megaphone"></i> 公告系統
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../../pages/reports/reports.html">
+              <i class="bi bi-bar-chart"></i> 報表分析
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../../pages/settings/settings.html">
+              <i class="bi bi-gear"></i> 系統設定
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Main content -->
+      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1 class="h2">勤惰管理系統</h1>
+          <div class="btn-toolbar mb-2 mb-md-0">
+            <div class="input-group me-2">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
+              <input type="text" class="form-control" placeholder="搜尋員工...">
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">
+              <i class="bi bi-calendar"></i> 本月
+            </button>
+          </div>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-md-3">
+            <div class="summary-card">
+              <h5><i class="bi bi-person-check text-success"></i> 出勤摘要</h5>
+              <div class="row mt-3">
+                <div class="col-6 mb-3">
+                  <div class="small text-muted">當月出勤率</div>
+                  <div class="h4">97.2%</div>
+                </div>
+                <div class="col-6 mb-3">
+                  <div class="small text-muted">當月遲到率</div>
+                  <div class="h4">2.5%</div>
+                </div>
+                <div class="col-6">
+                  <div class="small text-muted">當月請假天數</div>
+                  <div class="h4">43 天</div>
+                </div>
+                <div class="col-6">
+                  <div class="small text-muted">當月缺勤天數</div>
+                  <div class="h4">12 天</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="summary-card">
+              <h5><i class="bi bi-calendar-event text-primary"></i> 我的出勤狀況</h5>
+              <div class="mt-3">
+                <div class="d-flex justify-content-between mb-2">
+                  <div class="small text-muted">剩餘特休天數</div>
+                  <div class="fw-bold">14 天</div>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <div class="small text-muted">剩餘病假天數</div>
+                  <div class="fw-bold">28 天</div>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <div class="small text-muted">剩餘婚假天數</div>
+                  <div class="fw-bold">8 天</div>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                  <div class="small text-muted">剩餘喪假天數</div>
+                  <div class="fw-bold">15 天</div>
+                </div>
+                <button class="btn btn-primary w-100">
+                  <i class="bi bi-plus-circle"></i> 申請請假
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-9">
+            <div class="calendar-container">
+              <div class="calendar-header">
+                <h5 class="mb-0">2023年4月出勤日曆</h5>
+                <div>
+                  <button class="btn btn-sm btn-outline-secondary me-2">
+                    <i class="bi bi-chevron-left"></i>
+                  </button>
+                  <button class="btn btn-sm btn-primary me-2">今天</button>
+                  <button class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-chevron-right"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="calendar-body">
+                <table class="calendar-table">
+                  <thead>
+                    <tr>
+                      <th>日</th>
+                      <th>一</th>
+                      <th>二</th>
+                      <th>三</th>
+                      <th>四</th>
+                      <th>五</th>
+                      <th>六</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="other-month">
+                        <span class="date-number">26</span>
+                      </td>
+                      <td class="other-month">
+                        <span class="date-number">27</span>
+                      </td>
+                      <td class="other-month">
+                        <span class="date-number">28</span>
+                      </td>
+                      <td class="other-month">
+                        <span class="date-number">29</span>
+                      </td>
+                      <td class="other-month">
+                        <span class="date-number">30</span>
+                      </td>
+                      <td class="other-month">
+                        <span class="date-number">31</span>
+                      </td>
+                      <td>
+                        <span class="date-number">1</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span class="date-number">2</span>
+                      </td>
+                      <td>
+                        <span class="date-number">3</span>
+                        <div class="attendance-status present">出勤</div>
+                      </td>
+                      <td>
+                        <span class="date-number">4</span>
+                        <div class="attendance-status present">出勤</div>
+                      </td>
+                      <td>
+                        <span class="date-number">5</span>
+                        <div class="attendance-status late">遲到</div>
+                      </td>
+                      <td>
+                        <span class="date-number">6</span>
+                        <div class="attendance-status present">出勤</div>
+                      </td>
+                      <td>
+                        <span class="date-number">7</span>
+                        <div class="attendance-status present">出勤</div>
+                      </td>
+                      <td>
+                        <span class="date-number">8</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span class="date-number">9</span>
+                      </td>
+                      <td>
+                        <span class="date-number">10</span>
+                        <div class="attendance-status present">出勤</div>
+                      </td>
+                      <td>
+                        <span class="date-number">11</span>
+                        <div class="attendance-status present">出勤</div>
+                      </td>
+                      <td>
+                        <span class="date-number">12</span>
+                        <div class="attendance-status present">出勤</div>
+                      </td>
+                      <td>
+                        <span class="date-number">13</span>
+                        <div class="attendance-status present">出勤</div>
+                      </td>
+                      <td>
+                        <span class="date-number">14</span>
+                        <div class="attendance-status leave">特休</div>
+                      </td>
+                      <td>
+                        <span class="date-number">15</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span class="date-number">16</span>
+                      </td>
+                      <td>
+                        <span class="date-number">17</span>
+                        <div class="attendance-status present">出勤</div>
+                      </td>
+                      <td>
+                        <span class="date-number">18</span>
+                        <div class="attendance-status present">出勤</div>
+                      </td>
+                      <td class="today">
+                        <span class="date-number">19</span>
+                        <div class="attendance-status present">出勤</div>
+                      </td>
+                      <td>
+                        <span class="date-number">20</span>
+                      </td>
+                      <td>
+                        <span class="date-number">21</span>
+                      </td>
+                      <td>
+                        <span class="date-number">22</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span class="date-number">23</span>
+                      </td>
+                      <td>
+                        <span class="date-number">24</span>
+                      </td>
+                      <td>
+                        <span class="date-number">25</span>
+                      </td>
+                      <td>
+                        <span class="date-number">26</span>
+                      </td>
+                      <td>
+                        <span class="date-number">27</span>
+                      </td>
+                      <td>
+                        <span class="date-number">28</span>
+                      </td>
+                      <td>
+                        <span class="date-number">29</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span class="date-number">30</span>
+                      </td>
+                      <td class="other-month">
+                        <span class="date-number">1</span>
+                      </td>
+                      <td class="other-month">
+                        <span class="date-number">2</span>
+                      </td>
+                      <td class="other-month">
+                        <span class="date-number">3</span>
+                      </td>
+                      <td class="other-month">
+                        <span class="date-number">4</span>
+                      </td>
+                      <td class="other-month">
+                        <span class="date-number">5</span>
+                      </td>
+                      <td class="other-month">
+                        <span class="date-number">6</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="summary-card">
+                  <h5><i class="bi bi-card-checklist text-info"></i> 待審核請假申請</h5>
+                  <div class="table-responsive mt-3">
+                    <table class="table table-sm">
+                      <thead>
+                        <tr>
+                          <th>員工</th>
+                          <th>請假類型</th>
+                          <th>日期</th>
+                          <th>狀態</th>
+                          <th>操作</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>林美玲</td>
+                          <td>特休</td>
+                          <td>4/24-4/26</td>
+                          <td><span class="badge bg-warning">待審核</span></td>
+                          <td>
+                            <button class="btn btn-sm btn-outline-success">核准</button>
+                            <button class="btn btn-sm btn-outline-danger">拒絕</button>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>陳志明</td>
+                          <td>病假</td>
+                          <td>4/22</td>
+                          <td><span class="badge bg-warning">待審核</span></td>
+                          <td>
+                            <button class="btn btn-sm btn-outline-success">核准</button>
+                            <button class="btn btn-sm btn-outline-danger">拒絕</button>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>王小華</td>
+                          <td>公假</td>
+                          <td>4/28-4/30</td>
+                          <td><span class="badge bg-warning">待審核</span></td>
+                          <td>
+                            <button class="btn btn-sm btn-outline-success">核准</button>
+                            <button class="btn btn-sm btn-outline-danger">拒絕</button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <a href="#" class="btn btn-sm btn-outline-primary float-end">查看所有申請</a>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="summary-card">
+                  <h5><i class="bi bi-clipboard-data text-danger"></i> 出勤異常名單</h5>
+                  <div class="table-responsive mt-3">
+                    <table class="table table-sm">
+                      <thead>
+                        <tr>
+                          <th>員工</th>
+                          <th>部門</th>
+                          <th>日期</th>
+                          <th>異常類型</th>
+                          <th>操作</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>張忠明</td>
+                          <td>營運部</td>
+                          <td>4/18</td>
+                          <td><span class="badge bg-danger">缺勤</span></td>
+                          <td>
+                            <button class="btn btn-sm btn-outline-primary">處理</button>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>李小龍</td>
+                          <td>機務部</td>
+                          <td>4/17</td>
+                          <td><span class="badge bg-warning">遲到</span></td>
+                          <td>
+                            <button class="btn btn-sm btn-outline-primary">處理</button>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>許雅文</td>
+                          <td>業務組</td>
+                          <td>4/15</td>
+                          <td><span class="badge bg-danger">早退</span></td>
+                          <td>
+                            <button class="btn btn-sm btn-outline-primary">處理</button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <a href="#" class="btn btn-sm btn-outline-primary float-end">查看所有異常</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">假別管理</h5>
+                <button class="btn btn-sm btn-primary">
+                  <i class="bi bi-plus"></i> 新增假別
+                </button>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>假別名稱</th>
+                        <th>代碼</th>
+                        <th>天數上限</th>
+                        <th>薪資計算方式</th>
+                        <th>需附證明</th>
+                        <th>適用對象</th>
+                        <th>操作</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>特別休假</td>
+                        <td>AL</td>
+                        <td>依年資</td>
+                        <td>全薪</td>
+                        <td>否</td>
+                        <td>全部員工</td>
+                        <td>
+                          <button class="btn btn-sm btn-outline-primary me-1">編輯</button>
+                          <button class="btn btn-sm btn-outline-danger">刪除</button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>病假</td>
+                        <td>SL</td>
+                        <td>30天/年</td>
+                        <td>半薪</td>
+                        <td>3天以上</td>
+                        <td>全部員工</td>
+                        <td>
+                          <button class="btn btn-sm btn-outline-primary me-1">編輯</button>
+                          <button class="btn btn-sm btn-outline-danger">刪除</button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>婚假</td>
+                        <td>ML</td>
+                        <td>8天</td>
+                        <td>全薪</td>
+                        <td>是</td>
+                        <td>全部員工</td>
+                        <td>
+                          <button class="btn btn-sm btn-outline-primary me-1">編輯</button>
+                          <button class="btn btn-sm btn-outline-danger">刪除</button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>喪假</td>
+                        <td>BL</td>
+                        <td>依親屬關係</td>
+                        <td>全薪</td>
+                        <td>是</td>
+                        <td>全部員工</td>
+                        <td>
+                          <button class="btn btn-sm btn-outline-primary me-1">編輯</button>
+                          <button class="btn btn-sm btn-outline-danger">刪除</button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>公假</td>
+                        <td>OL</td>
+                        <td>依實際需求</td>
+                        <td>全薪</td>
+                        <td>是</td>
+                        <td>全部員工</td>
+                        <td>
+                          <button class="btn btn-sm btn-outline-primary me-1">編輯</button>
+                          <button class="btn btn-sm btn-outline-danger">刪除</button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Attendance page specific JavaScript can be added here
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize any interactive elements
+      const calendarCells = document.querySelectorAll('.calendar-table td:not(.other-month)');
+      
+      calendarCells.forEach(cell => {
+        cell.addEventListener('click', function() {
+          // Show modal or details for the selected date
+          const date = this.querySelector('.date-number').textContent;
+          alert(`您點擊了 4月${date}日，此處可顯示詳細出勤記錄或加入編輯功能。`);
+        });
+      });
+      
+      // Example for approval buttons
+      const approveButtons = document.querySelectorAll('.btn-outline-success');
+      approveButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const row = this.closest('tr');
+          const employeeName = row.cells[0].textContent;
+          alert(`已核准 ${employeeName} 的請假申請`);
+          row.cells[3].innerHTML = '<span class="badge bg-success">已核准</span>';
+          this.parentNode.innerHTML = '<button class="btn btn-sm btn-outline-secondary">查看</button>';
+        });
+      });
+      
+      const rejectButtons = document.querySelectorAll('.btn-outline-danger');
+      rejectButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const row = this.closest('tr');
+          const employeeName = row.cells[0].textContent;
+          const reason = prompt(`請輸入拒絕 ${employeeName} 請假申請的原因:`);
+          if (reason) {
+            alert(`已拒絕 ${employeeName} 的請假申請`);
+            row.cells[3].innerHTML = '<span class="badge bg-danger">已拒絕</span>';
+            this.parentNode.innerHTML = '<button class="btn btn-sm btn-outline-secondary">查看</button>';
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html> 

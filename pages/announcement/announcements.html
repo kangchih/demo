@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公布欄 - DEMO</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/dashboard.css">
+    <style>
+        .announcement-card {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--spacing-lg);
+            overflow: hidden;
+        }
+        
+        .announcement-card-header {
+            background-color: var(--bg-light);
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .announcement-card-body {
+            padding: var(--spacing-md);
+        }
+        
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            padding: var(--spacing-md);
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .filter-label {
+            font-weight: 600;
+            color: var(--text-color);
+            white-space: nowrap;
+        }
+        
+        .filter-select {
+            padding: 0.4rem 0.6rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            background-color: var(--bg-white);
+            min-width: 120px;
+        }
+        
+        .search-filter {
+            display: flex;
+            align-items: center;
+            background-color: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            padding: 0 var(--spacing-sm);
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .search-filter input {
+            border: none;
+            padding: 0.4rem;
+            width: 100%;
+            outline: none;
+        }
+        
+        .search-filter i {
+            color: var(--text-light);
+        }
+        
+        .announcements-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+        
+        .announcement-item {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: var(--spacing-md);
+            border-left: 4px solid var(--border-color);
+            transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+        }
+        
+        .announcement-item:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .announcement-item.important {
+            border-left-color: var(--accent-color);
+        }
+        
+        .announcement-item.system {
+            border-left-color: var(--secondary-color);
+        }
+        
+        .announcement-item.benefit {
+            border-left-color: var(--success-color);
+        }
+        
+        .announcement-item.alert {
+            border-left-color: var(--danger-color);
+        }
+        
+        .announcement-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .announcement-title {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+            color: var(--text-color);
+        }
+        
+        .announcement-meta {
+            display: flex;
+            gap: var(--spacing-md);
+            color: var(--text-light);
+            font-size: var(--font-size-sm);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .announcement-meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+        
+        .announcement-content {
+            color: var(--text-color);
+            line-height: 1.6;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .announcement-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: var(--spacing-md);
+        }
+        
+        .badge {
+            padding: 0.3rem 0.6rem;
+            border-radius: 20px;
+            font-size: var(--font-size-xs);
+            font-weight: 500;
+        }
+        
+        .badge.important {
+            background-color: rgba(255, 130, 0, 0.1);
+            color: var(--accent-color);
+        }
+        
+        .badge.system {
+            background-color: rgba(0, 126, 165, 0.1);
+            color: var(--secondary-color);
+        }
+        
+        .badge.benefit {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+        }
+        
+        .badge.alert {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: var(--danger-color);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+        
+        .read-more {
+            text-decoration: none;
+            color: var(--secondary-color);
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            padding: 0.2rem 0.5rem;
+            border-radius: var(--border-radius-sm);
+            transition: background-color var(--transition-fast);
+        }
+        
+        .read-more:hover {
+            background-color: rgba(0, 126, 165, 0.1);
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: var(--spacing-xl);
+            gap: var(--spacing-xs);
+        }
+        
+        .page-item {
+            display: inline-block;
+        }
+        
+        .page-link {
+            padding: 0.5rem 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+        
+        .page-link:hover {
+            background-color: var(--bg-light);
+        }
+        
+        .page-item.active .page-link {
+            background-color: var(--primary-color);
+            color: var(--text-white);
+            border-color: var(--primary-color);
+        }
+        
+        .page-item.disabled .page-link {
+            color: var(--text-lighter);
+            pointer-events: none;
+        }
+        
+        @media (max-width: 768px) {
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-group {
+                flex-wrap: wrap;
+            }
+            
+            .search-filter {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img alt="" src="../../assets/images/demo.png" />
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="../../index.html"><i class="fas fa-tachometer-alt"></i>儀表板</a>
+                    </li>
+                    <li>
+                        <a href="../employees/employee-list.html"><i class="fas fa-users"></i>員工管理</a>
+                    </li>
+                    <li>
+                        <a href="../organization/org-chart.html"><i class="fas fa-sitemap"></i>組織架構</a>
+                    </li>
+                    <li>
+                        <a href="../attendance/attendance.html"><i class="fas fa-calendar-check"></i>勤惰管理</a>
+                    </li>
+                    <li>
+                        <a href="../payroll/payroll.html"><i class="fas fa-money-bill-wave"></i>薪資與獎金</a>
+                    </li>
+                    <li class="active">
+                        <a href="announcements.html"><i class="fas fa-bullhorn"></i>公布欄</a>
+                    </li>
+                    <li>
+                        <a href="../reports/reports.html"><i class="fas fa-chart-bar"></i>報表中心</a>
+                    </li>
+                    <li>
+                        <a href="../settings/settings.html"><i class="fas fa-cog"></i>系統設定</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <span class="user-info">
+                    <img src="../../assets/images/user-avatar.jpg" alt="使用者頭像" class="avatar">
+                    <span class="user-name">王小明</span>
+                    <span class="user-role">HR專員</span>
+                </span>
+                <a href="../../login.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2>公布欄</h2>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <input type="text" placeholder="搜尋...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <div class="messages">
+                        <i class="fas fa-envelope"></i>
+                        <span class="badge">5</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <!-- 公告篩選器 -->
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <span class="filter-label">類型:</span>
+                        <select class="filter-select">
+                            <option value="all">全部類型</option>
+                            <option value="important">重要公告</option>
+                            <option value="system">系統公告</option>
+                            <option value="benefit">福利公告</option>
+                            <option value="alert">緊急通知</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <span class="filter-label">部門:</span>
+                        <select class="filter-select">
+                            <option value="all">全公司</option>
+                            <option value="hr">人資部</option>
+                            <option value="ops">營運部</option>
+                            <option value="eng">工程部</option>
+                            <option value="fin">財務部</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <span class="filter-label">日期:</span>
+                        <select class="filter-select">
+                            <option value="all">所有時間</option>
+                            <option value="today">今日</option>
+                            <option value="week">本週</option>
+                            <option value="month">本月</option>
+                            <option value="quarter">本季</option>
+                        </select>
+                    </div>
+                    <div class="search-filter">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="搜尋公告...">
+                    </div>
+                </div>
+
+                <!-- 公告管理 -->
+                <div class="announcement-card">
+                    <div class="announcement-card-header">
+                        <h3><i class="fas fa-bullhorn"></i> 公告管理</h3>
+                        <div class="header-actions">
+                            <button class="btn btn-sm btn-primary"><i class="fas fa-plus"></i> 新增公告</button>
+                        </div>
+                    </div>
+                    <div class="announcement-card-body">
+                        <div class="announcements-list">
+                            <!-- 重要公告 -->
+                            <div class="announcement-item important">
+                                <div class="announcement-header">
+                                    <h4 class="announcement-title">2023年度員工健康檢查通知</h4>
+                                    <span class="badge important">重要</span>
+                                </div>
+                                <div class="announcement-meta">
+                                    <div class="announcement-meta-item">
+                                        <i class="fas fa-user"></i>
+                                        <span>人資部 - 張小華</span>
+                                    </div>
+                                    <div class="announcement-meta-item">
+                                        <i class="fas fa-calendar"></i>
+                                        <span>2023/06/10</span>
+                                    </div>
+                                    <div class="announcement-meta-item">
+                                        <i class="fas fa-eye"></i>
+                                        <span>閱讀人數: 145</span>
+                                    </div>
+                                </div>
+                                <div class="announcement-content">
+                                    依照公司政策，所有員工必須於7月底前完成年度健康檢查，請各部門主管協助安排人員依照排程前往指定醫院進行檢查。今年度合作醫院為台北醫學大學附設醫院及長庚醫院，詳細資訊請參閱附件。
+                                </div>
+                                <div class="announcement-footer">
+                                    <div class="attachment">
+                                        <i class="fas fa-paperclip"></i>
+                                        <a href="#">健檢排程表.pdf</a>
+                                    </div>
+                                    <div class="action-buttons">
+                                        <a href="#" class="read-more">閱讀全文</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 系統公告 -->
+                            <div class="announcement-item system">
+                                <div class="announcement-header">
+                                    <h4 class="announcement-title">人資系統功能更新公告</h4>
+                                    <span class="badge system">系統</span>
+                                </div>
+                                <div class="announcement-meta">
+                                    <div class="announcement-meta-item">
+                                        <i class="fas fa-user"></i>
+                                        <span>資訊部 - 李大同</span>
+                                    </div>
+                                    <div class="announcement-meta-item">
+                                        <i class="fas fa-calendar"></i>
+                                        <span>2023/06/08</span>
+                                    </div>
+                                    <div class="announcement-meta-item">
+                                        <i class="fas fa-eye"></i>
+                                        <span>閱讀人數: 132</span>
+                                    </div>
+                                </div>
+                                <div class="announcement-content">
+                                    為提升使用體驗，人資系統將於6月25日進行功能更新，新增多項報表功能及優化介面。更新期間系統將暫停服務約2小時（預計凌晨2:00-4:00），請各位同仁提前完成相關工作，以免影響業務進行。
+                                </div>
+                                <div class="announcement-footer">
+                                    <div class="attachment">
+                                        <i class="fas fa-paperclip"></i>
+                                        <a href="#">系統更新說明.pdf</a>
+                                    </div>
+                                    <div class="action-buttons">
+                                        <a href="#" class="read-more">閱讀全文</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 福利公告 -->
+                            <div class="announcement-item benefit">
+                                <div class="announcement-header">
+                                    <h4 class="announcement-title">端午節福利發放通知</h4>
+                                    <span class="badge benefit">福利</span>
+                                </div>
+                                <div class="announcement-meta">
+                                    <div class="announcement-meta-item">
+                                        <i class="fas fa-user"></i>
+                                        <span>人資部 - 王小明</span>
+                                    </div>
+                                    <div class="announcement-meta-item">
+                                        <i class="fas fa-calendar"></i>
+                                        <span>2023/06/05</span>
+                                    </div>
+                                    <div class="announcement-meta-item">
+                                        <i class="fas fa-eye"></i>
+                                        <span>閱讀人數: 201</span>
+                                    </div>
+                                </div>
+                                <div class="announcement-content">
+                                    2023年端午節禮金將於6月15日隨薪資一併發放，請各位同仁留意帳戶入帳情況。另外，公司已為全體員工準備精美粽子禮盒，將於6月19日（星期一）發放，請各部門派代表至行政部領取。
+                                </div>
+                                <div class="announcement-footer">
+                                    <div class="action-buttons">
+                                        <a href="#" class="read-more">閱讀全文</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 緊急通知 -->
+                            <div class="announcement-item alert">
+                                <div class="announcement-header">
+                                    <h4 class="announcement-title">總部大樓消防演習通知</h4>
+                                    <span class="badge alert">緊急</span>
+                                </div>
+                                <div class="announcement-meta">
+                                    <div class="announcement-meta-item">
+                                        <i class="fas fa-user"></i>
+                                        <span>行政部 - 陳安全</span>
+                                    </div>
+                                    <div class="announcement-meta-item">
+                                        <i class="fas fa-calendar"></i>
+                                        <span>2023/06/01</span>
+                                    </div>
+                                    <div class="announcement-meta-item">
+                                        <i class="fas fa-eye"></i>
+                                        <span>閱讀人數: 189</span>
+                                    </div>
+                                </div>
+                                <div class="announcement-content">
+                                    依消防法規定，總部大樓將於6月20日(二)上午10:00進行年度消防演習，演習時間約30分鐘。演習前將發出警報聲響，全體員工需依照逃生路線圖指示，攜帶個人貴重物品快速疏散至指定集合地點。請各部門主管確保所有同仁參與此次演習。
+                                </div>
+                                <div class="announcement-footer">
+                                    <div class="attachment">
+                                        <i class="fas fa-paperclip"></i>
+                                        <a href="#">逃生路線圖.pdf</a>
+                                    </div>
+                                    <div class="action-buttons">
+                                        <a href="#" class="read-more">閱讀全文</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 一般公告 -->
+                            <div class="announcement-item">
+                                <div class="announcement-header">
+                                    <h4 class="announcement-title">員工餐廳菜單調整通知</h4>
+                                    <span class="badge">一般</span>
+                                </div>
+                                <div class="announcement-meta">
+                                    <div class="announcement-meta-item">
+                                        <i class="fas fa-user"></i>
+                                        <span>總務部 - 林美食</span>
+                                    </div>
+                                    <div class="announcement-meta-item">
+                                        <i class="fas fa-calendar"></i>
+                                        <span>2023/05/28</span>
+                                    </div>
+                                    <div class="announcement-meta-item">
+                                        <i class="fas fa-eye"></i>
+                                        <span>閱讀人數: 176</span>
+                                    </div>
+                                </div>
+                                <div class="announcement-content">
+                                    因應夏季到來，員工餐廳將從6月1日起調整菜單，增加多項涼拌菜色及冷湯選擇。同時，為提升用餐品質，我們邀請了新的餐飲團隊加入服務，歡迎同仁前往品嚐並提供寶貴意見。
+                                </div>
+                                <div class="announcement-footer">
+                                    <div class="attachment">
+                                        <i class="fas fa-paperclip"></i>
+                                        <a href="#">6月菜單.pdf</a>
+                                    </div>
+                                    <div class="action-buttons">
+                                        <a href="#" class="read-more">閱讀全文</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 分頁控制 -->
+                        <div class="pagination">
+                            <div class="page-item disabled">
+                                <a class="page-link" href="#" aria-label="Previous">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </div>
+                            <div class="page-item active">
+                                <a class="page-link" href="#">1</a>
+                            </div>
+                            <div class="page-item">
+                                <a class="page-link" href="#">2</a>
+                            </div>
+                            <div class="page-item">
+                                <a class="page-link" href="#">3</a>
+                            </div>
+                            <div class="page-item">
+                                <a class="page-link" href="#" aria-label="Next">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 側邊欄收合功能
+            $('#menu-toggle').click(function() {
+                $('.sidebar').toggleClass('collapsed');
+                $('.main-content').toggleClass('expanded');
+            });
+        });
+    </script>
+</body>
+</html> 
