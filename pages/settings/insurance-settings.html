@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>保險與退休金設定 - DEMO</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/dashboard.css">
+    <style>
+        .settings-card {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--spacing-lg);
+            overflow: hidden;
+        }
+        
+        .settings-card-header {
+            background-color: var(--bg-light);
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .settings-card-body {
+            padding: var(--spacing-md);
+        }
+        
+        .settings-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: var(--spacing-md);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        .settings-tab {
+            padding: var(--spacing-sm) var(--spacing-md);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+            color: var(--text-light);
+            transition: all var(--transition-fast);
+        }
+        
+        .settings-tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .settings-tab:hover:not(.active) {
+            background-color: var(--bg-light);
+        }
+        
+        .settings-tab i {
+            margin-right: var(--spacing-xs);
+        }
+        
+        .settings-section {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            border: 1px solid var(--border-color);
+        }
+        
+        .settings-section h4 {
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-xs);
+            border-bottom: 1px solid var(--border-light);
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: var(--spacing-xs);
+            font-weight: 500;
+        }
+        
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            width: 100%;
+            padding: var(--spacing-sm);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            background-color: var(--bg-white);
+        }
+        
+        .form-group input:focus, 
+        .form-group select:focus, 
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 84, 61, 0.1);
+        }
+        
+        .btn-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-md);
+        }
+        
+        .table-settings {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table-settings th, 
+        .table-settings td {
+            padding: var(--spacing-sm);
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .table-settings th {
+            font-weight: 600;
+            background-color: var(--bg-light);
+        }
+        
+        .table-settings tr:hover {
+            background-color: var(--bg-lighter);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25em 0.6em;
+            font-size: 80%;
+            font-weight: 500;
+            border-radius: 0.25rem;
+            color: var(--text-white);
+        }
+        
+        .badge-success {
+            background-color: var(--success-color);
+        }
+        
+        .badge-danger {
+            background-color: var(--danger-color);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* 特定保險設定樣式 */
+        .rate-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .rate-info label {
+            width: 180px;
+            font-weight: 500;
+        }
+        
+        .rate-info .input-group {
+            display: flex;
+            align-items: center;
+        }
+        
+        .rate-info .input-group input {
+            width: 100px;
+            text-align: right;
+        }
+        
+        .rate-info .input-group span {
+            margin-left: var(--spacing-xs);
+        }
+        
+        .exemption-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .exemption-item input[type="checkbox"] {
+            margin-right: var(--spacing-xs);
+            width: auto;
+        }
+        
+        .info-text {
+            color: var(--text-light);
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-xs);
+        }
+        
+        .info-text i {
+            color: var(--primary-color);
+            margin-right: var(--spacing-xs);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img alt="" src="../../assets/images/demo.png" />
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="../../index.html"><i class="fas fa-tachometer-alt"></i>儀表板</a>
+                    </li>
+                    <li>
+                        <a href="../employees/employee-list.html"><i class="fas fa-users"></i>員工管理</a>
+                    </li>
+                    <li>
+                        <a href="../organization/org-chart.html"><i class="fas fa-sitemap"></i>組織架構</a>
+                    </li>
+                    <li>
+                        <a href="../attendance/attendance.html"><i class="fas fa-calendar-check"></i>勤惰管理</a>
+                    </li>
+                    <li>
+                        <a href="../payroll/payroll.html"><i class="fas fa-money-bill-wave"></i>薪資與獎金</a>
+                    </li>
+                    <li>
+                        <a href="../announcement/announcements.html"><i class="fas fa-bullhorn"></i>公布欄</a>
+                    </li>
+                    <li>
+                        <a href="../reports/reports.html"><i class="fas fa-chart-bar"></i>報表中心</a>
+                    </li>
+                    <li class="active">
+                        <a href="settings.html"><i class="fas fa-cog"></i>系統設定</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <span class="user-info">
+                    <img src="../../assets/images/user-avatar.jpg" alt="使用者頭像" class="avatar">
+                    <span class="user-name">王小明</span>
+                    <span class="user-role">HR專員</span>
+                </span>
+                <a href="../../login.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2>保險與退休金設定</h2>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <input type="text" placeholder="搜尋...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <div class="messages">
+                        <i class="fas fa-envelope"></i>
+                        <span class="badge">5</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <!-- Settings Content -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <h3><i class="fas fa-shield-alt"></i> 保險與退休金設定</h3>
+                    </div>
+                    <div class="settings-card-body">
+                        <div class="settings-tabs">
+                            <div class="settings-tab active" data-tab="labor-insurance"><i class="fas fa-user-shield"></i> 勞保設定</div>
+                            <div class="settings-tab" data-tab="health-insurance"><i class="fas fa-heartbeat"></i> 健保設定</div>
+                            <div class="settings-tab" data-tab="pension"><i class="fas fa-piggy-bank"></i> 勞退設定</div>
+                            <div class="settings-tab" data-tab="exemption"><i class="fas fa-hand-holding-medical"></i> 保險減免</div>
+                        </div>
+                    
+                        <!-- 勞保設定 Tab -->
+                        <div id="labor-insurance" class="tab-content active">
+                            <div class="settings-section">
+                                <h4><i class="fas fa-user-shield"></i> 勞工保險費率設定</h4>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <form>
+                                            <div class="form-group">
+                                                <div class="rate-info">
+                                                    <label>普通事故保險費率</label>
+                                                    <div class="input-group">
+                                                        <input type="number" step="0.01" value="11.00" class="form-control">
+                                                        <span>%</span>
+                                                    </div>
+                                                </div>
+                                                <div class="info-text">
+                                                    <i class="fas fa-info-circle"></i> 普通事故保險費由勞保局公告，雇主負擔70%，勞工負擔20%，政府負擔10%
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="rate-info">
+                                                    <label>就業保險費率</label>
+                                                    <div class="input-group">
+                                                        <input type="number" step="0.01" value="1.00" class="form-control">
+                                                        <span>%</span>
+                                                    </div>
+                                                </div>
+                                                <div class="info-text">
+                                                    <i class="fas fa-info-circle"></i> 就業保險費率由勞保局公告，雇主負擔70%，勞工負擔30%
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="rate-info">
+                                                    <label>職業災害保險費率</label>
+                                                    <div class="input-group">
+                                                        <input type="number" step="0.01" value="0.21" class="form-control">
+                                                        <span>%</span>
+                                                    </div>
+                                                </div>
+                                                <div class="info-text">
+                                                    <i class="fas fa-info-circle"></i> 職業災害保險費率依行業別不同而有差異，全部由雇主負擔
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="insured-salary-basis">投保薪資計算基礎</label>
+                                                <select id="insured-salary-basis" class="form-control">
+                                                    <option selected>依勞保投保薪資分級表</option>
+                                                    <option>依實際薪資</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label><input type="checkbox" checked> 自動更新勞保費率和分級表</label>
+                                                <div class="info-text">
+                                                    <i class="fas fa-info-circle"></i> 系統將依據勞保局最新公告自動更新費率
+                                                </div>
+                                            </div>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-outline-secondary">取消</button>
+                                                <button type="submit" class="btn btn-primary">儲存變更</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-section">
+                                <h4><i class="fas fa-table"></i> 勞保投保薪資分級表</h4>
+                                <div class="table-responsive">
+                                    <table class="table-settings">
+                                        <thead>
+                                            <tr>
+                                                <th>級距</th>
+                                                <th>月薪資範圍 (元)</th>
+                                                <th>投保薪資 (元)</th>
+                                                <th>狀態</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>1</td>
+                                                <td>23,800以下</td>
+                                                <td>23,800</td>
+                                                <td><span class="badge badge-success">有效</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>2</td>
+                                                <td>23,801 ~ 24,000</td>
+                                                <td>24,000</td>
+                                                <td><span class="badge badge-success">有效</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>3</td>
+                                                <td>24,001 ~ 25,200</td>
+                                                <td>25,200</td>
+                                                <td><span class="badge badge-success">有效</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>4</td>
+                                                <td>25,201 ~ 26,400</td>
+                                                <td>26,400</td>
+                                                <td><span class="badge badge-success">有效</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>5</td>
+                                                <td>26,401 ~ 27,600</td>
+                                                <td>27,600</td>
+                                                <td><span class="badge badge-success">有效</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-outline-primary">匯入分級表</button>
+                                    <button type="button" class="btn btn-outline-primary">匯出分級表</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 健保設定 Tab -->
+                        <div id="health-insurance" class="tab-content">
+                            <div class="settings-section">
+                                <h4><i class="fas fa-heartbeat"></i> 健康保險費率設定</h4>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <form>
+                                            <div class="form-group">
+                                                <div class="rate-info">
+                                                    <label>一般保險費率</label>
+                                                    <div class="input-group">
+                                                        <input type="number" step="0.01" value="5.17" class="form-control">
+                                                        <span>%</span>
+                                                    </div>
+                                                </div>
+                                                <div class="info-text">
+                                                    <i class="fas fa-info-circle"></i> 一般健保保險費率由健保署公告，一類被保險人費率為5.17%
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="rate-info">
+                                                    <label>補充保險費率</label>
+                                                    <div class="input-group">
+                                                        <input type="number" step="0.01" value="2.11" class="form-control">
+                                                        <span>%</span>
+                                                    </div>
+                                                </div>
+                                                <div class="info-text">
+                                                    <i class="fas fa-info-circle"></i> 補充保險費率由健保署公告，目前為2.11%
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="health-insurance-calculation">健保計算方式</label>
+                                                <select id="health-insurance-calculation" class="form-control">
+                                                    <option selected>依投保金額計算</option>
+                                                    <option>依實際薪資計算</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label><input type="checkbox" checked> 自動更新健保費率和分級表</label>
+                                                <div class="info-text">
+                                                    <i class="fas fa-info-circle"></i> 系統將依據健保署最新公告自動更新費率
+                                                </div>
+                                            </div>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-outline-secondary">取消</button>
+                                                <button type="submit" class="btn btn-primary">儲存變更</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-section">
+                                <h4><i class="fas fa-table"></i> 健保投保金額分級表</h4>
+                                <div class="table-responsive">
+                                    <table class="table-settings">
+                                        <thead>
+                                            <tr>
+                                                <th>級距</th>
+                                                <th>月薪資範圍 (元)</th>
+                                                <th>投保金額 (元)</th>
+                                                <th>狀態</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>1</td>
+                                                <td>24,000以下</td>
+                                                <td>24,000</td>
+                                                <td><span class="badge badge-success">有效</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>2</td>
+                                                <td>24,001 ~ 25,200</td>
+                                                <td>25,200</td>
+                                                <td><span class="badge badge-success">有效</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>3</td>
+                                                <td>25,201 ~ 26,400</td>
+                                                <td>26,400</td>
+                                                <td><span class="badge badge-success">有效</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>4</td>
+                                                <td>26,401 ~ 27,600</td>
+                                                <td>27,600</td>
+                                                <td><span class="badge badge-success">有效</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>5</td>
+                                                <td>27,601 ~ 28,800</td>
+                                                <td>28,800</td>
+                                                <td><span class="badge badge-success">有效</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-outline-primary">匯入分級表</button>
+                                    <button type="button" class="btn btn-outline-primary">匯出分級表</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 勞退設定 Tab -->
+                        <div id="pension" class="tab-content">
+                            <div class="settings-section">
+                                <h4><i class="fas fa-piggy-bank"></i> 勞工退休金設定</h4>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <form>
+                                            <div class="form-group">
+                                                <div class="rate-info">
+                                                    <label>雇主提撥率（強制）</label>
+                                                    <div class="input-group">
+                                                        <input type="number" step="0.01" value="6.00" class="form-control">
+                                                        <span>%</span>
+                                                    </div>
+                                                </div>
+                                                <div class="info-text">
+                                                    <i class="fas fa-info-circle"></i> 新制勞工退休金，雇主每月負擔不得低於勞工每月工資6%
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="rate-info">
+                                                    <label>預設員工自提率</label>
+                                                    <div class="input-group">
+                                                        <input type="number" step="0.01" value="0.00" class="form-control">
+                                                        <span>%</span>
+                                                    </div>
+                                                </div>
+                                                <div class="info-text">
+                                                    <i class="fas fa-info-circle"></i> 勞工自願提繳，可在每月工資6%範圍內，自行提繳退休金
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="pension-basis">退休金提繳工資計算基礎</label>
+                                                <select id="pension-basis" class="form-control">
+                                                    <option selected>依月薪資總額</option>
+                                                    <option>依勞保投保薪資</option>
+                                                    <option>依勞退提繳工資分級表</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label><input type="checkbox" checked> 套用勞退提繳分級表最低級距</label>
+                                                <div class="info-text">
+                                                    <i class="fas fa-info-circle"></i> 月薪資低於基本工資時，按基本工資提繳
+                                                </div>
+                                            </div>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-outline-secondary">取消</button>
+                                                <button type="submit" class="btn btn-primary">儲存變更</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-section">
+                                <h4><i class="fas fa-table"></i> 舊制退休準備金</h4>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <form>
+                                            <div class="form-group">
+                                                <div class="rate-info">
+                                                    <label>舊制退休準備金提撥率</label>
+                                                    <div class="input-group">
+                                                        <input type="number" step="0.01" value="2.00" class="form-control">
+                                                        <span>%</span>
+                                                    </div>
+                                                </div>
+                                                <div class="info-text">
+                                                    <i class="fas fa-info-circle"></i> 舊制退休準備金提撥率由勞動部公告
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="old-pension-account">舊制退休準備金專戶</label>
+                                                <input type="text" id="old-pension-account" value="台灣銀行 XX分行 123456789" class="form-control">
+                                            </div>
+                                            <div class="form-group">
+                                                <label><input type="checkbox" checked> 僅針對94年7月1日前到職且選擇續用舊制員工提撥</label>
+                                            </div>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-outline-secondary">取消</button>
+                                                <button type="submit" class="btn btn-primary">儲存變更</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 保險減免 Tab -->
+                        <div id="exemption" class="tab-content">
+                            <div class="settings-section">
+                                <h4><i class="fas fa-hand-holding-medical"></i> 勞保、健保減免設定</h4>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <form>
+                                            <div class="form-group">
+                                                <h5>勞工保險減免資格</h5>
+                                                <div class="exemption-item">
+                                                    <label><input type="checkbox" checked> 年滿65歲員工得免勞保普通事故保險</label>
+                                                </div>
+                                                <div class="exemption-item">
+                                                    <label><input type="checkbox" checked> 已領取勞保老年給付之再就業員工得免勞保普通事故保險</label>
+                                                </div>
+                                                <div class="exemption-item">
+                                                    <label><input type="checkbox" checked> 外籍專業人士免就業保險</label>
+                                                </div>
+                                                <div class="info-text">
+                                                    <i class="fas fa-info-circle"></i> 職業災害保險不可減免，所有員工皆須強制投保
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <h5>健康保險減免資格</h5>
+                                                <div class="exemption-item">
+                                                    <label><input type="checkbox" checked> 在台無眷屬之外籍員工得免付眷口費</label>
+                                                </div>
+                                                <div class="exemption-item">
+                                                    <label><input type="checkbox" checked> 已有其他投保資格之兼職員工得免繳健保費</label>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <h5>勞退提撥減免資格</h5>
+                                                <div class="exemption-item">
+                                                    <label><input type="checkbox" checked> 年滿65歲（適用勞動基準法第54條強制退休）員工得免提繳勞退</label>
+                                                </div>
+                                                <div class="exemption-item">
+                                                    <label><input type="checkbox" checked> 選擇適用舊制退休金之既有員工得免提繳新制勞退</label>
+                                                </div>
+                                                <div class="exemption-item">
+                                                    <label><input type="checkbox"> 依就業服務法聘僱之外國籍員工得免提繳勞退</label>
+                                                </div>
+                                                <div class="info-text">
+                                                    <i class="fas fa-info-circle"></i> 依勞工退休金條例規定，外籍配偶或永久居留外國人應提繳勞退
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <h5>減免資格確認機制</h5>
+                                                <div class="exemption-item">
+                                                    <label><input type="checkbox" checked> 啟用自動檢查員工減免資格</label>
+                                                </div>
+                                                <div class="exemption-item">
+                                                    <label><input type="checkbox" checked> 每月申報前檢查減免資格異動狀況</label>
+                                                </div>
+                                                <div class="exemption-item">
+                                                    <label><input type="checkbox" checked> 保險減免需主管核准</label>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-outline-secondary">取消</button>
+                                                <button type="submit" class="btn btn-primary">儲存變更</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-section">
+                                <h4><i class="fas fa-file-alt"></i> 保險減免申請表單</h4>
+                                <p>員工申請保險減免所需上傳之證明文件：</p>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <form>
+                                            <div class="form-group">
+                                                <label>勞保減免需求文件</label>
+                                                <div class="exemption-item">
+                                                    <label><input type="checkbox" checked> 身分證正反面影本</label>
+                                                </div>
+                                                <div class="exemption-item">
+                                                    <label><input type="checkbox" checked> 勞保老年給付核定通知</label>
+                                                </div>
+                                                <div class="exemption-item">
+                                                    <label><input type="checkbox" checked> 扶養親屬聲明書</label>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label>健保減免需求文件</label>
+                                                <div class="exemption-item">
+                                                    <label><input type="checkbox" checked> 健保投保證明</label>
+                                                </div>
+                                                <div class="exemption-item">
+                                                    <label><input type="checkbox" checked> 在台親屬狀況聲明書</label>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label>勞退減免需求文件</label>
+                                                <div class="exemption-item">
+                                                    <label><input type="checkbox" checked> 勞退選擇書</label>
+                                                </div>
+                                                <div class="exemption-item">
+                                                    <label><input type="checkbox" checked> 舊制年資證明</label>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-outline-secondary">取消</button>
+                                                <button type="submit" class="btn btn-primary">儲存變更</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 側邊欄收合功能
+            $('#menu-toggle').click(function() {
+                $('.sidebar').toggleClass('collapsed');
+                $('.main-content').toggleClass('expanded');
+            });
+            
+            // 標籤頁切換功能
+            $('.settings-tab').click(function() {
+                var tabId = $(this).data('tab');
+                
+                // 切換標籤頁激活狀態
+                $('.settings-tab').removeClass('active');
+                $(this).addClass('active');
+                
+                // 切換內容顯示
+                $('.tab-content').removeClass('active');
+                $('#' + tabId).addClass('active');
+            });
+            
+            // 數字輸入驗證
+            $('input[type="number"]').on('input', function() {
+                let value = parseFloat($(this).val());
+                let min = parseFloat($(this).attr('min') || 0);
+                let max = parseFloat($(this).attr('max') || 100);
+                
+                if(value < min) {
+                    $(this).val(min);
+                } else if(value > max) {
+                    $(this).val(max);
+                }
+            });
+            
+            // 表單提交前驗證
+            $('form').on('submit', function(e) {
+                e.preventDefault();
+                // 這裡可以添加表單驗證邏輯
+                
+                // 模擬保存成功
+                alert('設定已成功儲存');
+            });
+        });
+    </script>
+</body>
+</html> 

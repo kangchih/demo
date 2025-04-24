@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>假日與行事曆設定 - DEMO</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/dashboard.css">
+    <style>
+        .settings-card {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--spacing-lg);
+            overflow: hidden;
+        }
+        
+        .settings-card-header {
+            background-color: var(--bg-light);
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .settings-card-body {
+            padding: var(--spacing-md);
+        }
+        
+        .settings-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: var(--spacing-md);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        .settings-tab {
+            padding: var(--spacing-sm) var(--spacing-md);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+            color: var(--text-light);
+            transition: all var(--transition-fast);
+        }
+        
+        .settings-tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .settings-tab:hover:not(.active) {
+            background-color: var(--bg-light);
+        }
+        
+        .settings-tab i {
+            margin-right: var(--spacing-xs);
+        }
+        
+        .settings-section {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            border: 1px solid var(--border-color);
+        }
+        
+        .settings-section h4 {
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-xs);
+            border-bottom: 1px solid var(--border-light);
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: var(--spacing-xs);
+            font-weight: 500;
+        }
+        
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            width: 100%;
+            padding: var(--spacing-sm);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            background-color: var(--bg-white);
+        }
+        
+        .form-group input:focus, 
+        .form-group select:focus, 
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 84, 61, 0.1);
+        }
+        
+        .btn-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-md);
+        }
+        
+        .table-settings {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table-settings th, 
+        .table-settings td {
+            padding: var(--spacing-sm);
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .table-settings th {
+            font-weight: 600;
+            background-color: var(--bg-light);
+        }
+        
+        .table-settings tr:hover {
+            background-color: var(--bg-lighter);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25em 0.6em;
+            font-size: 80%;
+            font-weight: 500;
+            border-radius: 0.25rem;
+            color: var(--text-white);
+        }
+        
+        .badge-success {
+            background-color: var(--success-color);
+        }
+        
+        .badge-danger {
+            background-color: var(--danger-color);
+        }
+        
+        .badge-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* 行事曆與假日特定樣式 */
+        .calendar-wrapper {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: var(--spacing-xs);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .calendar-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .calendar-header div {
+            padding: var(--spacing-xs);
+        }
+        
+        .calendar-day {
+            border: 1px solid var(--border-light);
+            border-radius: var(--border-radius-sm);
+            padding: var(--spacing-xs);
+            min-height: 80px;
+            position: relative;
+        }
+        
+        .calendar-day.other-month {
+            background-color: var(--bg-lighter);
+            opacity: 0.7;
+        }
+        
+        .calendar-day.weekend {
+            background-color: #f8f9fa;
+        }
+        
+        .calendar-day.holiday {
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+        
+        .calendar-day.today {
+            border: 2px solid var(--primary-color);
+        }
+        
+        .day-number {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .holiday-badge {
+            display: inline-block;
+            background-color: var(--danger-color);
+            color: white;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-top: 4px;
+        }
+        
+        .holiday-list {
+            margin-top: var(--spacing-md);
+        }
+        
+        .holiday-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-sm);
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .holiday-item:hover {
+            background-color: var(--bg-lighter);
+        }
+        
+        .holiday-date {
+            font-weight: 500;
+        }
+        
+        .holiday-actions button {
+            margin-left: var(--spacing-xs);
+        }
+        
+        .calendar-control {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .month-selector {
+            display: flex;
+            align-items: center;
+        }
+        
+        .month-selector button {
+            border: none;
+            background: none;
+            font-size: 1.2rem;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+        
+        .month-selector h3 {
+            margin: 0 var(--spacing-md);
+            font-weight: 600;
+        }
+        
+        .leave-type-container {
+            margin-top: var(--spacing-md);
+        }
+        
+        .leave-type-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-sm);
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .leave-type-item:hover {
+            background-color: var(--bg-lighter);
+        }
+        
+        .leave-type-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: var(--spacing-sm);
+        }
+        
+        .leave-type-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .leave-type-actions button {
+            margin-left: var(--spacing-xs);
+        }
+        
+        .color-picker-container {
+            display: flex;
+            gap: var(--spacing-xs);
+            margin-top: var(--spacing-xs);
+        }
+        
+        .color-item {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .color-item.selected {
+            border-color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img alt="" src="../../assets/images/demo.png" />
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="../../index.html"><i class="fas fa-tachometer-alt"></i>儀表板</a>
+                    </li>
+                    <li>
+                        <a href="../employees/employee-list.html"><i class="fas fa-users"></i>員工管理</a>
+                    </li>
+                    <li>
+                        <a href="../organization/org-chart.html"><i class="fas fa-sitemap"></i>組織架構</a>
+                    </li>
+                    <li>
+                        <a href="../attendance/attendance.html"><i class="fas fa-calendar-check"></i>勤惰管理</a>
+                    </li>
+                    <li>
+                        <a href="../payroll/payroll.html"><i class="fas fa-money-bill-wave"></i>薪資與獎金</a>
+                    </li>
+                    <li>
+                        <a href="../announcement/announcements.html"><i class="fas fa-bullhorn"></i>公布欄</a>
+                    </li>
+                    <li>
+                        <a href="../reports/reports.html"><i class="fas fa-chart-bar"></i>報表中心</a>
+                    </li>
+                    <li class="active">
+                        <a href="settings.html"><i class="fas fa-cog"></i>系統設定</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <span class="user-info">
+                    <img src="../../assets/images/user-avatar.jpg" alt="使用者頭像" class="avatar">
+                    <span class="user-name">王小明</span>
+                    <span class="user-role">HR專員</span>
+                </span>
+                <a href="../../login.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2>假日與行事曆設定</h2>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <input type="text" placeholder="搜尋...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <div class="messages">
+                        <i class="fas fa-envelope"></i>
+                        <span class="badge">5</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <!-- Settings Content -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <h3><i class="fas fa-calendar-alt"></i> 假日與行事曆設定</h3>
+                    </div>
+                    <div class="settings-card-body">
+                        <div class="settings-tabs">
+                            <div class="settings-tab active" data-tab="calendar"><i class="fas fa-calendar-alt"></i> 行事曆設定</div>
+                            <div class="settings-tab" data-tab="holidays"><i class="fas fa-calendar-day"></i> 國定假日</div>
+                            <div class="settings-tab" data-tab="leave-types"><i class="fas fa-tasks"></i> 假別選項設定</div>
+                        </div>
+                    
+                        <!-- 行事曆設定 Tab -->
+                        <div id="calendar" class="tab-content active">
+                            <div class="settings-section">
+                                <h4><i class="fas fa-calendar-alt"></i> 行事曆顯示設定</h4>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <form>
+                                            <div class="form-group">
+                                                <label for="calendar-view">預設行事曆檢視</label>
+                                                <select id="calendar-view" class="form-control">
+                                                    <option selected>月檢視</option>
+                                                    <option>週檢視</option>
+                                                    <option>日檢視</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="week-start">每週開始日</label>
+                                                <select id="week-start" class="form-control">
+                                                    <option value="sunday">星期日</option>
+                                                    <option value="monday" selected>星期一</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label><input type="checkbox" checked> 在行事曆上顯示國定假日</label>
+                                            </div>
+                                            <div class="form-group">
+                                                <label><input type="checkbox" checked> 在行事曆上顯示公司特殊活動</label>
+                                            </div>
+                                            <div class="form-group">
+                                                <label><input type="checkbox" checked> 在行事曆上顯示員工生日</label>
+                                            </div>
+                                            <div class="form-group">
+                                                <label><input type="checkbox" checked> 在行事曆上標示法定工作日</label>
+                                            </div>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-outline-secondary">取消</button>
+                                                <button type="submit" class="btn btn-primary">儲存變更</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-section">
+                                <h4><i class="fas fa-calendar-week"></i> 公司行事曆預覽</h4>
+                                
+                                <div class="calendar-control">
+                                    <div class="month-selector">
+                                        <button id="prev-month"><i class="fas fa-chevron-left"></i></button>
+                                        <h3>2023年 6月</h3>
+                                        <button id="next-month"><i class="fas fa-chevron-right"></i></button>
+                                    </div>
+                                    <div class="calendar-actions">
+                                        <button class="btn btn-sm btn-outline-primary"><i class="fas fa-print"></i> 列印</button>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="fas fa-download"></i> 匯出</button>
+                                        <button class="btn btn-sm btn-primary"><i class="fas fa-plus"></i> 新增事件</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="calendar-header">
+                                    <div>週一</div>
+                                    <div>週二</div>
+                                    <div>週三</div>
+                                    <div>週四</div>
+                                    <div>週五</div>
+                                    <div>週六</div>
+                                    <div>週日</div>
+                                </div>
+                                <div class="calendar-wrapper">
+                                    <!-- 第一週 -->
+                                    <div class="calendar-day other-month">
+                                        <span class="day-number">29</span>
+                                    </div>
+                                    <div class="calendar-day other-month">
+                                        <span class="day-number">30</span>
+                                    </div>
+                                    <div class="calendar-day other-month">
+                                        <span class="day-number">31</span>
+                                    </div>
+                                    <div class="calendar-day">
+                                        <span class="day-number">1</span>
+                                    </div>
+                                    <div class="calendar-day">
+                                        <span class="day-number">2</span>
+                                    </div>
+                                    <div class="calendar-day weekend">
+                                        <span class="day-number">3</span>
+                                    </div>
+                                    <div class="calendar-day weekend">
+                                        <span class="day-number">4</span>
+                                    </div>
+                                    
+                                    <!-- 第二週 -->
+                                    <div class="calendar-day">
+                                        <span class="day-number">5</span>
+                                    </div>
+                                    <div class="calendar-day">
+                                        <span class="day-number">6</span>
+                                    </div>
+                                    <div class="calendar-day">
+                                        <span class="day-number">7</span>
+                                    </div>
+                                    <div class="calendar-day">
+                                        <span class="day-number">8</span>
+                                    </div>
+                                    <div class="calendar-day">
+                                        <span class="day-number">9</span>
+                                    </div>
+                                    <div class="calendar-day weekend">
+                                        <span class="day-number">10</span>
+                                    </div>
+                                    <div class="calendar-day weekend">
+                                        <span class="day-number">11</span>
+                                    </div>
+                                    
+                                    <!-- 第三週 -->
+                                    <div class="calendar-day">
+                                        <span class="day-number">12</span>
+                                    </div>
+                                    <div class="calendar-day">
+                                        <span class="day-number">13</span>
+                                    </div>
+                                    <div class="calendar-day">
+                                        <span class="day-number">14</span>
+                                    </div>
+                                    <div class="calendar-day">
+                                        <span class="day-number">15</span>
+                                    </div>
+                                    <div class="calendar-day today">
+                                        <span class="day-number">16</span>
+                                    </div>
+                                    <div class="calendar-day weekend">
+                                        <span class="day-number">17</span>
+                                    </div>
+                                    <div class="calendar-day weekend">
+                                        <span class="day-number">18</span>
+                                    </div>
+                                    
+                                    <!-- 第四週 -->
+                                    <div class="calendar-day">
+                                        <span class="day-number">19</span>
+                                    </div>
+                                    <div class="calendar-day">
+                                        <span class="day-number">20</span>
+                                    </div>
+                                    <div class="calendar-day">
+                                        <span class="day-number">21</span>
+                                    </div>
+                                    <div class="calendar-day">
+                                        <span class="day-number">22</span>
+                                        <div class="holiday-badge">端午節</div>
+                                    </div>
+                                    <div class="calendar-day holiday">
+                                        <span class="day-number">23</span>
+                                        <div class="holiday-badge">調整放假</div>
+                                    </div>
+                                    <div class="calendar-day weekend">
+                                        <span class="day-number">24</span>
+                                    </div>
+                                    <div class="calendar-day weekend">
+                                        <span class="day-number">25</span>
+                                    </div>
+                                    
+                                    <!-- 第五週 -->
+                                    <div class="calendar-day">
+                                        <span class="day-number">26</span>
+                                    </div>
+                                    <div class="calendar-day">
+                                        <span class="day-number">27</span>
+                                    </div>
+                                    <div class="calendar-day">
+                                        <span class="day-number">28</span>
+                                    </div>
+                                    <div class="calendar-day">
+                                        <span class="day-number">29</span>
+                                    </div>
+                                    <div class="calendar-day">
+                                        <span class="day-number">30</span>
+                                    </div>
+                                    <div class="calendar-day other-month weekend">
+                                        <span class="day-number">1</span>
+                                    </div>
+                                    <div class="calendar-day other-month weekend">
+                                        <span class="day-number">2</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-outline-primary"><i class="fas fa-edit"></i> 編輯行事曆</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 側邊欄收合功能
+            $('#menu-toggle').click(function() {
+                $('.sidebar').toggleClass('collapsed');
+                $('.main-content').toggleClass('expanded');
+            });
+            
+            // 標籤頁切換功能
+            $('.settings-tab').click(function() {
+                var tabId = $(this).data('tab');
+                
+                // 切換標籤頁激活狀態
+                $('.settings-tab').removeClass('active');
+                $(this).addClass('active');
+                
+                // 切換內容顯示
+                $('.tab-content').removeClass('active');
+                $('#' + tabId).addClass('active');
+            });
+            
+            // 月曆月份切換功能
+            $('#prev-month').click(function() {
+                // 實際專案中這裡會有月份切換的邏輯
+                alert('切換到上個月');
+            });
+            
+            $('#next-month').click(function() {
+                // 實際專案中這裡會有月份切換的邏輯
+                alert('切換到下個月');
+            });
+            
+            // 假日新增按鈕事件
+            $('.btn-primary').filter(function() {
+                return $(this).text().includes('新增假日');
+            }).click(function() {
+                // 實際專案中這裡會打開新增假日的表單
+                alert('打開新增假日表單');
+            });
+            
+            // 假別新增按鈕事件
+            $('.btn-primary').filter(function() {
+                return $(this).text().includes('新增假別');
+            }).click(function() {
+                // 實際專案中這裡會打開新增假別的表單
+                alert('打開新增假別表單');
+            });
+            
+            // 編輯行事曆按鈕事件
+            $('.btn-outline-primary').filter(function() {
+                return $(this).text().includes('編輯行事曆');
+            }).click(function() {
+                // 實際專案中這裡會啟用行事曆編輯模式
+                alert('啟用行事曆編輯模式');
+            });
+            
+            // 表單提交事件
+            $('form').on('submit', function(e) {
+                e.preventDefault();
+                // 實際專案中這裡會有表單驗證和提交邏輯
+                alert('設定已成功儲存');
+            });
+            
+            // 模擬有交互的行事曆日期點擊
+            $('.calendar-day').click(function() {
+                // 實際專案中這裡會顯示該日期的詳細資訊或編輯表單
+                if (!$(this).hasClass('other-month')) {
+                    var dayNum = $(this).find('.day-number').text();
+                    alert('您點擊了 2023年6月' + dayNum + '日');
+                }
+            });
+            
+            // 同步國定假日按鈕事件
+            $('.btn-outline-primary').filter(function() {
+                return $(this).text().includes('同步國定假日');
+            }).click(function() {
+                // 實際專案中這裡會有同步國定假日的邏輯
+                alert('正在同步最新國定假日資料');
+            });
+        });
+    </script>
+</body>
+</html> 
