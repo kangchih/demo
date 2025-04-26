@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>操作統計分析 - DEMO人力資源管理系統</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        /* Page specific styles */
+        .date-filter {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            background-color: var(--bg-white);
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .date-filter label {
+            white-space: nowrap;
+            font-weight: 500;
+        }
+        
+        .date-filter select,
+        .date-filter input {
+            padding: 0.4rem 0.6rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            min-width: 120px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .stat-card {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: var(--spacing-md);
+            text-align: center;
+            transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .stat-icon {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .stat-icon.create {
+            color: #0070e0;
+        }
+        
+        .stat-icon.update {
+            color: #e09500;
+        }
+        
+        .stat-icon.delete {
+            color: #dc3545;
+        }
+        
+        .stat-icon.view {
+            color: #6c757d;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .stat-label {
+            font-size: var(--font-size-sm);
+            color: var(--text-light);
+        }
+        
+        .stat-trend {
+            display: inline-flex;
+            align-items: center;
+            font-size: var(--font-size-xs);
+            margin-top: var(--spacing-xs);
+        }
+        
+        .trend-up {
+            color: var(--success-color);
+        }
+        
+        .trend-down {
+            color: var(--danger-color);
+        }
+        
+        .trend-neutral {
+            color: var(--text-light);
+        }
+        
+        .chart-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .chart-card {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: var(--spacing-md);
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .chart-title {
+            font-size: var(--font-size-md);
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .chart-container {
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-light);
+            border-radius: var(--border-radius-sm);
+            margin-bottom: var(--spacing-sm);
+            color: var(--text-light);
+        }
+        
+        .top-list {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .top-list-header {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .top-list-body {
+            padding: var(--spacing-md);
+        }
+        
+        .top-list-title {
+            font-size: var(--font-size-md);
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .top-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-sm) 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .top-item:last-child {
+            border-bottom: none;
+        }
+        
+        .top-item-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .top-item-number {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--font-size-xs);
+            margin-right: var(--spacing-sm);
+        }
+        
+        .top-item-rank-1 {
+            background-color: #ffd700;
+            color: #000;
+        }
+        
+        .top-item-rank-2 {
+            background-color: #c0c0c0;
+            color: #000;
+        }
+        
+        .top-item-rank-3 {
+            background-color: #cd7f32;
+            color: #fff;
+        }
+        
+        .top-item-name {
+            font-weight: 500;
+        }
+        
+        .top-item-value {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        @media (max-width: 992px) {
+            .chart-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .date-filter {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .date-filter .btn {
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img alt="" src="../../assets/images/demo.png" />
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="../../index.html"><i class="fas fa-tachometer-alt"></i>儀表板</a>
+                    </li>
+                    <li>
+                        <a href="../employees/employee-list.html"><i class="fas fa-users"></i>員工管理</a>
+                    </li>
+                    <li>
+                        <a href="../organization/org-chart.html"><i class="fas fa-sitemap"></i>組織架構</a>
+                    </li>
+                    <li>
+                        <a href="../attendance/attendance.html"><i class="fas fa-calendar-check"></i>勤惰管理</a>
+                    </li>
+                    <li>
+                        <a href="../payroll/payroll.html"><i class="fas fa-money-bill-wave"></i>薪資與獎金</a>
+                    </li>
+                    <li>
+                        <a href="../announcement/announcements.html"><i class="fas fa-bullhorn"></i>公布欄</a>
+                    </li>
+                    <li class="active">
+                        <a href="operation-records.html"><i class="fas fa-history"></i>操作紀錄</a>
+                    </li>
+                    <li>
+                        <a href="../reports/reports.html"><i class="fas fa-chart-bar"></i>報表中心</a>
+                    </li>
+                    <li>
+                        <a href="../settings/settings.html"><i class="fas fa-cog"></i>系統設定</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <span class="user-info">
+                    <img src="../../assets/images/user-avatar.jpg" alt="使用者頭像" class="avatar">
+                    <span class="user-name">王小明</span>
+                    <span class="user-role">HR專員</span>
+                </span>
+                <a href="../../login.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2>操作統計分析</h2>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <input type="text" placeholder="搜尋...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <div class="messages">
+                        <i class="fas fa-envelope"></i>
+                        <span class="badge">5</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <!-- 日期範圍篩選 -->
+                <div class="date-filter">
+                    <label>時間範圍:</label>
+                    <select class="form-control">
+                        <option value="today">今天</option>
+                        <option value="yesterday">昨天</option>
+                        <option value="this_week">本週</option>
+                        <option value="last_week">上週</option>
+                        <option value="this_month" selected>本月</option>
+                        <option value="last_month">上月</option>
+                        <option value="this_quarter">本季</option>
+                        <option value="last_quarter">上季</option>
+                        <option value="this_year">今年</option>
+                        <option value="custom">自訂日期</option>
+                    </select>
+                    
+                    <label>從:</label>
+                    <input type="date" class="form-control" value="2023-06-01">
+                    
+                    <label>到:</label>
+                    <input type="date" class="form-control" value="2023-06-30">
+                    
+                    <button class="btn btn-primary">套用</button>
+                </div>
+                
+                <!-- 統計摘要 -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-history"></i></div>
+                        <div class="stat-value">2,568</div>
+                        <div class="stat-label">總操作次數</div>
+                        <div class="stat-trend trend-up">
+                            <i class="fas fa-arrow-up"></i> 12% 與上個月相比
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon create"><i class="fas fa-plus-circle"></i></div>
+                        <div class="stat-value">345</div>
+                        <div class="stat-label">新增操作</div>
+                        <div class="stat-trend trend-up">
+                            <i class="fas fa-arrow-up"></i> 8% 與上個月相比
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon update"><i class="fas fa-edit"></i></div>
+                        <div class="stat-value">1,287</div>
+                        <div class="stat-label">更新操作</div>
+                        <div class="stat-trend trend-up">
+                            <i class="fas fa-arrow-up"></i> 15% 與上個月相比
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon delete"><i class="fas fa-trash-alt"></i></div>
+                        <div class="stat-value">89</div>
+                        <div class="stat-label">刪除操作</div>
+                        <div class="stat-trend trend-down">
+                            <i class="fas fa-arrow-down"></i> 5% 與上個月相比
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon view"><i class="fas fa-eye"></i></div>
+                        <div class="stat-value">847</div>
+                        <div class="stat-label">查看操作</div>
+                        <div class="stat-trend trend-up">
+                            <i class="fas fa-arrow-up"></i> 10% 與上個月相比
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 圖表分析 -->
+                <div class="chart-row">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h4 class="chart-title">操作類型分佈</h4>
+                            <div class="chart-actions">
+                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-download"></i></button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <div>操作類型圓餅圖</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h4 class="chart-title">每日操作趨勢</h4>
+                            <div class="chart-actions">
+                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-download"></i></button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <div>每日操作量折線圖</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-row">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h4 class="chart-title">功能使用頻率</h4>
+                            <div class="chart-actions">
+                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-download"></i></button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <div>功能使用長條圖</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h4 class="chart-title">操作時間分佈</h4>
+                            <div class="chart-actions">
+                                <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-download"></i></button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <div>時間分佈熱力圖</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 排行榜 -->
+                <div class="top-list">
+                    <div class="top-list-header">
+                        <h4 class="top-list-title">操作量最多的員工</h4>
+                    </div>
+                    <div class="top-list-body">
+                        <div class="top-item">
+                            <div class="top-item-info">
+                                <div class="top-item-number top-item-rank-1">1</div>
+                                <div class="top-item-name">陳小華 (EMP001)</div>
+                            </div>
+                            <div class="top-item-value">587 次操作</div>
+                        </div>
+                        <div class="top-item">
+                            <div class="top-item-info">
+                                <div class="top-item-number top-item-rank-2">2</div>
+                                <div class="top-item-name">王小明 (EMP005)</div>
+                            </div>
+                            <div class="top-item-value">432 次操作</div>
+                        </div>
+                        <div class="top-item">
+                            <div class="top-item-info">
+                                <div class="top-item-number top-item-rank-3">3</div>
+                                <div class="top-item-name">李大明 (EMP002)</div>
+                            </div>
+                            <div class="top-item-value">356 次操作</div>
+                        </div>
+                        <div class="top-item">
+                            <div class="top-item-info">
+                                <div class="top-item-number">4</div>
+                                <div class="top-item-name">王小美 (EMP003)</div>
+                            </div>
+                            <div class="top-item-value">287 次操作</div>
+                        </div>
+                        <div class="top-item">
+                            <div class="top-item-info">
+                                <div class="top-item-number">5</div>
+                                <div class="top-item-name">張小龍 (EMP004)</div>
+                            </div>
+                            <div class="top-item-value">215 次操作</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 最常被操作的功能 -->
+                <div class="top-list">
+                    <div class="top-list-header">
+                        <h4 class="top-list-title">最常被使用的功能</h4>
+                    </div>
+                    <div class="top-list-body">
+                        <div class="top-item">
+                            <div class="top-item-info">
+                                <div class="top-item-number top-item-rank-1">1</div>
+                                <div class="top-item-name">員工管理</div>
+                            </div>
+                            <div class="top-item-value">842 次使用</div>
+                        </div>
+                        <div class="top-item">
+                            <div class="top-item-info">
+                                <div class="top-item-number top-item-rank-2">2</div>
+                                <div class="top-item-name">勤惰管理</div>
+                            </div>
+                            <div class="top-item-value">635 次使用</div>
+                        </div>
+                        <div class="top-item">
+                            <div class="top-item-info">
+                                <div class="top-item-number top-item-rank-3">3</div>
+                                <div class="top-item-name">薪資與獎金</div>
+                            </div>
+                            <div class="top-item-value">473 次使用</div>
+                        </div>
+                        <div class="top-item">
+                            <div class="top-item-info">
+                                <div class="top-item-number">4</div>
+                                <div class="top-item-name">公布欄</div>
+                            </div>
+                            <div class="top-item-value">356 次使用</div>
+                        </div>
+                        <div class="top-item">
+                            <div class="top-item-info">
+                                <div class="top-item-number">5</div>
+                                <div class="top-item-name">報表中心</div>
+                            </div>
+                            <div class="top-item-value">262 次使用</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Toggle sidebar
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            document.querySelector('.app-container').classList.toggle('sidebar-collapsed');
+        });
+        
+        // 時間範圍選擇
+        document.querySelector('.date-filter select').addEventListener('change', function() {
+            const customDateInputs = document.querySelectorAll('.date-filter input[type="date"]');
+            if (this.value === 'custom') {
+                customDateInputs.forEach(input => input.style.display = 'inline-block');
+            } else {
+                // 在實際應用中，這裡會根據選擇的時間範圍自動設定日期範圍
+                console.log('選擇的時間範圍:', this.value);
+            }
+        });
+        
+        // 套用篩選條件
+        document.querySelector('.date-filter .btn').addEventListener('click', function() {
+            // 實際專案會實作套用篩選條件的邏輯
+            console.log('套用日期範圍篩選');
+        });
+        
+        // 圖表下載
+        document.querySelectorAll('.chart-actions .btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                // 實際專案會實作圖表下載功能
+                alert('下載圖表');
+            });
+        });
+    </script>
+</body>
+</html> 

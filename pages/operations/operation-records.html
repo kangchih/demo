@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>員工操作紀錄 - DEMO人力資源管理系統</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        /* Page specific styles */
+        .filter-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+        }
+        
+        .search-filter {
+            display: flex;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+        }
+        
+        .search-filter select,
+        .search-filter input {
+            max-width: 200px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+        
+        .operation-type {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: var(--font-size-xs);
+            font-weight: 500;
+        }
+        
+        .type-create {
+            background-color: rgba(0, 123, 255, 0.1);
+            color: #0070e0;
+        }
+        
+        .type-update {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #e09500;
+        }
+        
+        .type-delete {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+        
+        .type-login {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+        
+        .type-view {
+            background-color: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+        }
+        
+        .type-export {
+            background-color: rgba(111, 66, 193, 0.1);
+            color: #6f42c1;
+        }
+        
+        .employee-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .employee-name-cell {
+            display: flex;
+            align-items: center;
+        }
+        
+        .employee-info {
+            margin-left: var(--spacing-sm);
+        }
+        
+        .employee-name {
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        
+        .employee-id {
+            font-size: var(--font-size-xs);
+            color: var(--text-lighter);
+        }
+        
+        .action-cell {
+            display: flex;
+            gap: var(--spacing-xs);
+        }
+        
+        .action-btn {
+            font-size: var(--font-size-sm);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-lighter);
+            color: var(--text-light);
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .action-btn:hover {
+            background-color: var(--primary-color);
+            color: var(--text-white);
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: var(--spacing-lg);
+            gap: var(--spacing-xs);
+        }
+        
+        .page-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 32px;
+            border-radius: var(--border-radius-sm);
+            padding: 0 var(--spacing-xs);
+            background-color: var(--bg-white);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .page-item.active {
+            background-color: var(--primary-color);
+            color: var(--text-white);
+            border-color: var(--primary-color);
+        }
+        
+        .page-item:hover:not(.active) {
+            background-color: var(--bg-lighter);
+        }
+        
+        /* Chart related styles */
+        .charts-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .chart-card {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: var(--spacing-md);
+        }
+        
+        .chart-title {
+            font-size: var(--font-size-md);
+            font-weight: 600;
+            margin-bottom: var(--spacing-md);
+            color: var(--text-color);
+        }
+        
+        .chart-container {
+            height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-light);
+            border-radius: var(--border-radius-sm);
+            margin-bottom: var(--spacing-sm);
+            color: var(--text-light);
+        }
+        
+        @media (max-width: 768px) {
+            .filter-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .action-buttons {
+                margin-top: var(--spacing-sm);
+                width: 100%;
+                justify-content: flex-end;
+            }
+            
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img alt="" src="../../assets/images/demo.png" />
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="../../index.html"><i class="fas fa-tachometer-alt"></i>儀表板</a>
+                    </li>
+                    <li>
+                        <a href="../employees/employee-list.html"><i class="fas fa-users"></i>員工管理</a>
+                    </li>
+                    <li>
+                        <a href="../organization/org-chart.html"><i class="fas fa-sitemap"></i>組織架構</a>
+                    </li>
+                    <li>
+                        <a href="../attendance/attendance.html"><i class="fas fa-calendar-check"></i>勤惰管理</a>
+                    </li>
+                    <li>
+                        <a href="../payroll/payroll.html"><i class="fas fa-money-bill-wave"></i>薪資與獎金</a>
+                    </li>
+                    <li>
+                        <a href="../announcement/announcements.html"><i class="fas fa-bullhorn"></i>公布欄</a>
+                    </li>
+                    <li class="active">
+                        <a href="operation-records.html"><i class="fas fa-history"></i>操作紀錄</a>
+                    </li>
+                    <li>
+                        <a href="../reports/reports.html"><i class="fas fa-chart-bar"></i>報表中心</a>
+                    </li>
+                    <li>
+                        <a href="../settings/settings.html"><i class="fas fa-cog"></i>系統設定</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <span class="user-info">
+                    <img src="../../assets/images/user-avatar.jpg" alt="使用者頭像" class="avatar">
+                    <span class="user-name">王小明</span>
+                    <span class="user-role">HR專員</span>
+                </span>
+                <a href="../../login.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2>員工操作紀錄</h2>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <input type="text" placeholder="搜尋...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <div class="messages">
+                        <i class="fas fa-envelope"></i>
+                        <span class="badge">5</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <!-- Charts Overview -->
+                <div class="charts-row">
+                    <div class="chart-card">
+                        <h4 class="chart-title">操作類型統計</h4>
+                        <div class="chart-container">
+                            <div>操作類型圓餅圖</div>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h4 class="chart-title">每日操作量趨勢</h4>
+                        <div class="chart-container">
+                            <div>每日操作量折線圖</div>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h4 class="chart-title">功能使用頻率</h4>
+                        <div class="chart-container">
+                            <div>功能使用長條圖</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>操作紀錄列表</h3>
+                        <div>
+                            <a href="operation-statistics.html" class="btn btn-secondary mr-2"><i class="fas fa-chart-bar"></i> 統計分析</a>
+                            <button class="btn btn-primary"><i class="fas fa-download"></i> 匯出紀錄</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="filter-bar">
+                            <div class="search-filter">
+                                <select class="form-control">
+                                    <option value="">所有員工</option>
+                                    <option value="emp001">陳小華 (EMP001)</option>
+                                    <option value="emp002">李大明 (EMP002)</option>
+                                    <option value="emp003">王小美 (EMP003)</option>
+                                    <option value="emp004">張小龍 (EMP004)</option>
+                                    <option value="emp005">林小珍 (EMP005)</option>
+                                </select>
+                                
+                                <select class="form-control">
+                                    <option value="">所有操作類型</option>
+                                    <option value="create">新增</option>
+                                    <option value="update">更新</option>
+                                    <option value="delete">刪除</option>
+                                    <option value="view">查看</option>
+                                    <option value="login">登入/登出</option>
+                                    <option value="export">匯出</option>
+                                </select>
+                                
+                                <select class="form-control">
+                                    <option value="">所有功能</option>
+                                    <option value="employee">員工管理</option>
+                                    <option value="attendance">勤惰管理</option>
+                                    <option value="payroll">薪資與獎金</option>
+                                    <option value="organization">組織架構</option>
+                                    <option value="announcement">公布欄</option>
+                                    <option value="report">報表中心</option>
+                                    <option value="setting">系統設定</option>
+                                </select>
+                                
+                                <input type="date" class="form-control" placeholder="開始日期">
+                                <input type="date" class="form-control" placeholder="結束日期">
+                                
+                                <button class="btn btn-secondary">搜尋</button>
+                            </div>
+                            
+                            <div class="action-buttons">
+                                <button class="btn btn-outline-secondary"><i class="fas fa-filter"></i> 進階篩選</button>
+                                <button class="btn btn-outline-secondary"><i class="fas fa-redo"></i> 重設</button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>員工</th>
+                                        <th>操作時間</th>
+                                        <th>操作類型</th>
+                                        <th>功能</th>
+                                        <th>詳細描述</th>
+                                        <th>IP位址</th>
+                                        <th>裝置</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="employee-name-cell">
+                                                <img src="../../assets/images/user-avatar.jpg" alt="員工頭像" class="employee-avatar">
+                                                <div class="employee-info">
+                                                    <div class="employee-name">陳小華</div>
+                                                    <div class="employee-id">EMP001</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>2023/06/15 14:35:22</td>
+                                        <td><span class="operation-type type-update">更新</span></td>
+                                        <td>員工管理</td>
+                                        <td>更新員工李大明(EMP002)的基本資料</td>
+                                        <td>192.168.1.105</td>
+                                        <td>Chrome / Windows</td>
+                                        <td>
+                                            <div class="action-cell">
+                                                <a href="operation-detail.html" class="action-btn" title="查看詳情"><i class="fas fa-eye"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="employee-name-cell">
+                                                <img src="../../assets/images/user-avatar.jpg" alt="員工頭像" class="employee-avatar">
+                                                <div class="employee-info">
+                                                    <div class="employee-name">王小明</div>
+                                                    <div class="employee-id">EMP005</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>2023/06/15 11:42:10</td>
+                                        <td><span class="operation-type type-create">新增</span></td>
+                                        <td>公布欄</td>
+                                        <td>新增公告「六月份部門會議通知」</td>
+                                        <td>192.168.1.110</td>
+                                        <td>Firefox / MacOS</td>
+                                        <td>
+                                            <div class="action-cell">
+                                                <a href="operation-detail.html" class="action-btn" title="查看詳情"><i class="fas fa-eye"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="employee-name-cell">
+                                                <img src="../../assets/images/user-avatar.jpg" alt="員工頭像" class="employee-avatar">
+                                                <div class="employee-info">
+                                                    <div class="employee-name">李大明</div>
+                                                    <div class="employee-id">EMP002</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>2023/06/15 10:30:45</td>
+                                        <td><span class="operation-type type-login">登入</span></td>
+                                        <td>系統</td>
+                                        <td>使用者登入系統</td>
+                                        <td>192.168.1.115</td>
+                                        <td>Chrome / Windows</td>
+                                        <td>
+                                            <div class="action-cell">
+                                                <a href="operation-detail.html" class="action-btn" title="查看詳情"><i class="fas fa-eye"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="employee-name-cell">
+                                                <img src="../../assets/images/user-avatar.jpg" alt="員工頭像" class="employee-avatar">
+                                                <div class="employee-info">
+                                                    <div class="employee-name">王小美</div>
+                                                    <div class="employee-id">EMP003</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>2023/06/14 16:20:33</td>
+                                        <td><span class="operation-type type-delete">刪除</span></td>
+                                        <td>公布欄</td>
+                                        <td>刪除過期公告「五月份部門活動通知」</td>
+                                        <td>192.168.1.120</td>
+                                        <td>Edge / Windows</td>
+                                        <td>
+                                            <div class="action-cell">
+                                                <a href="operation-detail.html" class="action-btn" title="查看詳情"><i class="fas fa-eye"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="employee-name-cell">
+                                                <img src="../../assets/images/user-avatar.jpg" alt="員工頭像" class="employee-avatar">
+                                                <div class="employee-info">
+                                                    <div class="employee-name">張小龍</div>
+                                                    <div class="employee-id">EMP004</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>2023/06/14 15:10:18</td>
+                                        <td><span class="operation-type type-view">查看</span></td>
+                                        <td>薪資管理</td>
+                                        <td>查看員工薪資列表</td>
+                                        <td>192.168.1.125</td>
+                                        <td>Safari / iOS</td>
+                                        <td>
+                                            <div class="action-cell">
+                                                <a href="operation-detail.html" class="action-btn" title="查看詳情"><i class="fas fa-eye"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="employee-name-cell">
+                                                <img src="../../assets/images/user-avatar.jpg" alt="員工頭像" class="employee-avatar">
+                                                <div class="employee-info">
+                                                    <div class="employee-name">陳小華</div>
+                                                    <div class="employee-id">EMP001</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>2023/06/14 13:45:09</td>
+                                        <td><span class="operation-type type-export">匯出</span></td>
+                                        <td>報表中心</td>
+                                        <td>匯出「五月份員工出勤報表」</td>
+                                        <td>192.168.1.105</td>
+                                        <td>Chrome / Windows</td>
+                                        <td>
+                                            <div class="action-cell">
+                                                <a href="operation-detail.html" class="action-btn" title="查看詳情"><i class="fas fa-eye"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="employee-name-cell">
+                                                <img src="../../assets/images/user-avatar.jpg" alt="員工頭像" class="employee-avatar">
+                                                <div class="employee-info">
+                                                    <div class="employee-name">王小明</div>
+                                                    <div class="employee-id">EMP005</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>2023/06/14 10:15:30</td>
+                                        <td><span class="operation-type type-update">更新</span></td>
+                                        <td>組織架構</td>
+                                        <td>更新資訊部門主管資料</td>
+                                        <td>192.168.1.110</td>
+                                        <td>Firefox / MacOS</td>
+                                        <td>
+                                            <div class="action-cell">
+                                                <a href="operation-detail.html" class="action-btn" title="查看詳情"><i class="fas fa-eye"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="pagination">
+                            <a href="#" class="page-item"><i class="fas fa-angle-double-left"></i></a>
+                            <a href="#" class="page-item"><i class="fas fa-angle-left"></i></a>
+                            <a href="#" class="page-item active">1</a>
+                            <a href="#" class="page-item">2</a>
+                            <a href="#" class="page-item">3</a>
+                            <a href="#" class="page-item">4</a>
+                            <a href="#" class="page-item">5</a>
+                            <a href="#" class="page-item"><i class="fas fa-angle-right"></i></a>
+                            <a href="#" class="page-item"><i class="fas fa-angle-double-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Toggle sidebar
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            document.querySelector('.app-container').classList.toggle('sidebar-collapsed');
+        });
+        
+        // Set current date in the header
+        document.addEventListener('DOMContentLoaded', function() {
+            // 假設有個地方要顯示當前日期
+            const today = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            // 實際專案中可能會用更複雜的日期處理庫
+        });
+        
+        // 實際專案會加入圖表相關的JavaScript，這裡僅作示例
+        // 如果專案有使用Chart.js等圖表庫，可以在這裡加入圖表初始化代碼
+        
+        // Example: 操作類型統計圖表
+        function initOperationTypeChart() {
+            // 實際專案會實作圖表繪製
+            console.log('初始化操作類型統計圖表');
+        }
+        
+        // Example: 每日操作量趨勢圖表
+        function initDailyOperationChart() {
+            // 實際專案會實作圖表繪製
+            console.log('初始化每日操作量趨勢圖表');
+        }
+        
+        // Example: 功能使用頻率圖表
+        function initFunctionUsageChart() {
+            // 實際專案會實作圖表繪製
+            console.log('初始化功能使用頻率圖表');
+        }
+        
+        // 初始化所有圖表
+        document.addEventListener('DOMContentLoaded', function() {
+            // 在真實專案中，這裡會調用上面定義的圖表初始化函數
+        });
+        
+        // 操作記錄詳情顯示
+        document.querySelectorAll('.action-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                // 如果是<a>標籤，則不需要阻止默認行為，讓連結正常運作
+                if (this.tagName !== 'A') {
+                    e.preventDefault();
+                    // 實際專案會實作點擊查看詳情的功能，可能是顯示一個模態框
+                    alert('查看操作記錄詳情');
+                }
+            });
+        });
+        
+        // 搜索和篩選功能
+        document.querySelector('.search-filter button').addEventListener('click', function() {
+            // 實際專案會實作搜索和篩選邏輯
+            console.log('執行搜索篩選');
+        });
+        
+        // 重設篩選條件
+        document.querySelector('.action-buttons button:nth-child(2)').addEventListener('click', function() {
+            // 實際專案會實作重設篩選條件的邏輯
+            document.querySelectorAll('.search-filter select, .search-filter input').forEach(function(el) {
+                el.value = '';
+            });
+            console.log('重設篩選條件');
+        });
+    </script>
+</body>
+</html> 
