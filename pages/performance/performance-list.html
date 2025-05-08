@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>績效評估 - DEMO人力資源管理系統</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        /* Page specific styles */
+        .filter-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+        }
+        
+        .search-filter {
+            display: flex;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+        }
+        
+        .search-filter select,
+        .search-filter input {
+            max-width: 200px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+        
+        .status-pending {
+            background-color: var(--warning-color);
+        }
+        
+        .status-completed {
+            background-color: var(--success-color);
+        }
+        
+        .status-overdue {
+            background-color: var(--danger-color);
+        }
+        
+        .status-draft {
+            background-color: var(--text-lighter);
+        }
+        
+        .performance-status {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: var(--spacing-xs);
+        }
+        
+        .employee-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .employee-name-cell {
+            display: flex;
+            align-items: center;
+        }
+        
+        .employee-info {
+            margin-left: var(--spacing-sm);
+        }
+        
+        .employee-name {
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        
+        .employee-id {
+            font-size: var(--font-size-xs);
+            color: var(--text-lighter);
+        }
+        
+        .action-cell {
+            display: flex;
+            gap: var(--spacing-xs);
+        }
+        
+        .action-btn {
+            font-size: var(--font-size-sm);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-lighter);
+            color: var(--text-light);
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .action-btn:hover {
+            background-color: var(--primary-color);
+            color: var(--text-white);
+        }
+        
+        .rating {
+            display: flex;
+            align-items: center;
+        }
+        
+        .rating .stars {
+            display: flex;
+            margin-right: var(--spacing-xs);
+        }
+        
+        .rating .stars i {
+            color: var(--accent-color);
+            font-size: var(--font-size-sm);
+            margin-right: 2px;
+        }
+        
+        .rating .score {
+            font-weight: 500;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: var(--spacing-lg);
+            gap: var(--spacing-xs);
+        }
+        
+        .page-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 32px;
+            border-radius: var(--border-radius-sm);
+            padding: 0 var(--spacing-xs);
+            background-color: var(--bg-white);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .page-item.active {
+            background-color: var(--primary-color);
+            color: var(--text-white);
+            border-color: var(--primary-color);
+        }
+        
+        .page-item:hover:not(.active) {
+            background-color: var(--bg-lighter);
+        }
+        
+        @media (max-width: 768px) {
+            .filter-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .action-buttons {
+                margin-top: var(--spacing-sm);
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img alt="" src="../../assets/images/demo.png" />
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="../../index.html"><i class="fas fa-tachometer-alt"></i>儀表板</a>
+                    </li>
+                    <li>
+                        <a href="../employees/employee-list.html"><i class="fas fa-users"></i>員工管理</a>
+                    </li>
+                    <li>
+                        <a href="../organization/org-chart.html"><i class="fas fa-sitemap"></i>組織架構</a>
+                    </li>
+                    <li>
+                        <a href="../attendance/attendance.html"><i class="fas fa-calendar-check"></i>勤惰管理</a>
+                    </li>
+                    <li>
+                        <a href="../payroll/payroll.html"><i class="fas fa-money-bill-wave"></i>薪資與獎金</a>
+                    </li>
+                    <li class="active">
+                        <a href="performance-list.html"><i class="fas fa-chart-line"></i>績效評估</a>
+                    </li>
+                    <li>
+                        <a href="../announcement/announcements.html"><i class="fas fa-bullhorn"></i>公布欄</a>
+                    </li>
+                    <li>
+                        <a href="../reports/reports.html"><i class="fas fa-chart-bar"></i>報表中心</a>
+                    </li>
+                    <li>
+                        <a href="../settings/settings.html"><i class="fas fa-cog"></i>系統設定</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <span class="user-info">
+                    <img src="../../assets/images/user-avatar.jpg" alt="使用者頭像" class="avatar">
+                    <span class="user-name">王小明</span>
+                    <span class="user-role">HR專員</span>
+                </span>
+                <a href="../../login.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2>績效評估</h2>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <input type="text" placeholder="搜尋...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <div class="messages">
+                        <i class="fas fa-envelope"></i>
+                        <span class="badge">5</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>績效評估列表</h3>
+                        <a href="create-performance.html" class="btn btn-primary"><i class="fas fa-plus"></i> 新增評估</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="filter-bar">
+                            <div class="search-filter">
+                                <select class="form-control">
+                                    <option value="">所有部門</option>
+                                    <option value="hr">人力資源部</option>
+                                    <option value="it">資訊部</option>
+                                    <option value="finance">財務部</option>
+                                    <option value="operations">營運部</option>
+                                    <option value="sales">業務部</option>
+                                </select>
+                                
+                                <select class="form-control">
+                                    <option value="">所有狀態</option>
+                                    <option value="pending">待評核</option>
+                                    <option value="draft">草稿</option>
+                                    <option value="completed">已完成</option>
+                                    <option value="overdue">已逾期</option>
+                                </select>
+                                
+                                <input type="text" class="form-control" placeholder="搜尋員工">
+                                
+                                <button class="btn btn-secondary">搜尋</button>
+                            </div>
+                            
+                            <div class="action-buttons">
+                                <button class="btn btn-outline-secondary"><i class="fas fa-filter"></i> 進階篩選</button>
+                                <button class="btn btn-outline-secondary"><i class="fas fa-download"></i> 匯出</button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>員工資訊</th>
+                                        <th>評估期間</th>
+                                        <th>部門</th>
+                                        <th>主管</th>
+                                        <th>評分</th>
+                                        <th>截止日期</th>
+                                        <th>狀態</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="employee-name-cell">
+                                                <img src="../../assets/images/user-avatar.jpg" alt="員工頭像" class="employee-avatar">
+                                                <div class="employee-info">
+                                                    <div class="employee-name">陳小華</div>
+                                                    <div class="employee-id">EMP001</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>2023上半年</td>
+                                        <td>人力資源部</td>
+                                        <td>張經理</td>
+                                        <td>
+                                            <div class="rating">
+                                                <div class="stars">
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="far fa-star"></i>
+                                                </div>
+                                                <span class="score">4.0</span>
+                                            </div>
+                                        </td>
+                                        <td>2023/06/30</td>
+                                        <td><span class="performance-status status-completed"></span>已完成</td>
+                                        <td>
+                                            <div class="action-cell">
+                                                <button class="action-btn" title="查看"><i class="fas fa-eye"></i></button>
+                                                <button class="action-btn" title="編輯"><i class="fas fa-edit"></i></button>
+                                                <button class="action-btn" title="更多"><i class="fas fa-ellipsis-v"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="employee-name-cell">
+                                                <img src="../../assets/images/user-avatar.jpg" alt="員工頭像" class="employee-avatar">
+                                                <div class="employee-info">
+                                                    <div class="employee-name">李大明</div>
+                                                    <div class="employee-id">EMP002</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>2023上半年</td>
+                                        <td>資訊部</td>
+                                        <td>劉經理</td>
+                                        <td>
+                                            <div class="rating">
+                                                <div class="stars">
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                </div>
+                                                <span class="score">5.0</span>
+                                            </div>
+                                        </td>
+                                        <td>2023/06/30</td>
+                                        <td><span class="performance-status status-completed"></span>已完成</td>
+                                        <td>
+                                            <div class="action-cell">
+                                                <button class="action-btn" title="查看"><i class="fas fa-eye"></i></button>
+                                                <button class="action-btn" title="編輯"><i class="fas fa-edit"></i></button>
+                                                <button class="action-btn" title="更多"><i class="fas fa-ellipsis-v"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="employee-name-cell">
+                                                <img src="../../assets/images/user-avatar.jpg" alt="員工頭像" class="employee-avatar">
+                                                <div class="employee-info">
+                                                    <div class="employee-name">王小美</div>
+                                                    <div class="employee-id">EMP003</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>2023上半年</td>
+                                        <td>財務部</td>
+                                        <td>黃經理</td>
+                                        <td>-</td>
+                                        <td>2023/06/30</td>
+                                        <td><span class="performance-status status-pending"></span>待評核</td>
+                                        <td>
+                                            <div class="action-cell">
+                                                <button class="action-btn" title="查看"><i class="fas fa-eye"></i></button>
+                                                <button class="action-btn" title="編輯"><i class="fas fa-edit"></i></button>
+                                                <button class="action-btn" title="更多"><i class="fas fa-ellipsis-v"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="employee-name-cell">
+                                                <img src="../../assets/images/user-avatar.jpg" alt="員工頭像" class="employee-avatar">
+                                                <div class="employee-info">
+                                                    <div class="employee-name">張小龍</div>
+                                                    <div class="employee-id">EMP004</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>2023上半年</td>
+                                        <td>營運部</td>
+                                        <td>楊經理</td>
+                                        <td>-</td>
+                                        <td>2023/06/15</td>
+                                        <td><span class="performance-status status-overdue"></span>已逾期</td>
+                                        <td>
+                                            <div class="action-cell">
+                                                <button class="action-btn" title="查看"><i class="fas fa-eye"></i></button>
+                                                <button class="action-btn" title="編輯"><i class="fas fa-edit"></i></button>
+                                                <button class="action-btn" title="更多"><i class="fas fa-ellipsis-v"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="employee-name-cell">
+                                                <img src="../../assets/images/user-avatar.jpg" alt="員工頭像" class="employee-avatar">
+                                                <div class="employee-info">
+                                                    <div class="employee-name">林小玲</div>
+                                                    <div class="employee-id">EMP005</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>2023上半年</td>
+                                        <td>業務部</td>
+                                        <td>徐經理</td>
+                                        <td>
+                                            <div class="rating">
+                                                <div class="stars">
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="far fa-star"></i>
+                                                    <i class="far fa-star"></i>
+                                                </div>
+                                                <span class="score">3.0</span>
+                                            </div>
+                                        </td>
+                                        <td>2023/06/30</td>
+                                        <td><span class="performance-status status-completed"></span>已完成</td>
+                                        <td>
+                                            <div class="action-cell">
+                                                <button class="action-btn" title="查看"><i class="fas fa-eye"></i></button>
+                                                <button class="action-btn" title="編輯"><i class="fas fa-edit"></i></button>
+                                                <button class="action-btn" title="更多"><i class="fas fa-ellipsis-v"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="employee-name-cell">
+                                                <img src="../../assets/images/user-avatar.jpg" alt="員工頭像" class="employee-avatar">
+                                                <div class="employee-info">
+                                                    <div class="employee-name">趙小強</div>
+                                                    <div class="employee-id">EMP006</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>2023上半年</td>
+                                        <td>人力資源部</td>
+                                        <td>張經理</td>
+                                        <td>-</td>
+                                        <td>2023/07/30</td>
+                                        <td><span class="performance-status status-draft"></span>草稿</td>
+                                        <td>
+                                            <div class="action-cell">
+                                                <button class="action-btn" title="查看"><i class="fas fa-eye"></i></button>
+                                                <button class="action-btn" title="編輯"><i class="fas fa-edit"></i></button>
+                                                <button class="action-btn" title="更多"><i class="fas fa-ellipsis-v"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="pagination">
+                            <a href="#" class="page-item"><i class="fas fa-chevron-left"></i></a>
+                            <a href="#" class="page-item active">1</a>
+                            <a href="#" class="page-item">2</a>
+                            <a href="#" class="page-item">3</a>
+                            <a href="#" class="page-item">...</a>
+                            <a href="#" class="page-item">10</a>
+                            <a href="#" class="page-item"><i class="fas fa-chevron-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../../assets/js/main.js"></script>
+</body>
+</html> 

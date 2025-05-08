@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>績效評估詳情 - DEMO人力資源管理系統</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        /* Page specific styles */
+        .performance-header {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-sm);
+            box-shadow: var(--shadow-sm);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+            position: relative;
+        }
+        
+        .performance-status {
+            position: absolute;
+            top: var(--spacing-lg);
+            right: var(--spacing-lg);
+            padding: var(--spacing-xs) var(--spacing-md);
+            border-radius: var(--border-radius-sm);
+            font-weight: 500;
+            font-size: var(--font-size-sm);
+        }
+        
+        .status-completed {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+        
+        .employee-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .employee-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: var(--spacing-md);
+            border: 3px solid var(--primary-color);
+        }
+        
+        .employee-details h3 {
+            margin: 0;
+            font-size: var(--font-size-xl);
+        }
+        
+        .employee-details p {
+            margin: var(--spacing-xs) 0;
+            color: var(--text-light);
+        }
+        
+        .meta-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-md);
+            padding-top: var(--spacing-md);
+            border-top: 1px solid var(--border-light);
+        }
+        
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .meta-label {
+            font-size: var(--font-size-sm);
+            color: var(--text-light);
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .meta-value {
+            font-weight: 500;
+        }
+        
+        .performance-section {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-sm);
+            box-shadow: var(--shadow-sm);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .performance-section-header {
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .performance-section-header h4 {
+            margin: 0;
+            color: var(--primary-color);
+        }
+        
+        .overall-rating {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: var(--spacing-md);
+            padding: var(--spacing-md);
+            background-color: var(--bg-lighter);
+            border-radius: var(--border-radius-md);
+        }
+        
+        .rating-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: var(--text-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--font-size-xxxl);
+            font-weight: 600;
+            margin-right: var(--spacing-md);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .rating-desc {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .rating-label {
+            font-size: var(--font-size-sm);
+            color: var(--text-light);
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .rating-text {
+            font-weight: 600;
+            font-size: var(--font-size-lg);
+            color: var(--primary-color);
+        }
+        
+        .rating-stars {
+            display: flex;
+            color: var(--accent-color);
+            font-size: var(--font-size-lg);
+            margin-top: var(--spacing-xs);
+        }
+        
+        .competency-item {
+            background-color: var(--bg-lighter);
+            border-radius: var(--border-radius-sm);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .competency-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .competency-name {
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .competency-rating {
+            display: flex;
+            align-items: center;
+        }
+        
+        .competency-stars {
+            margin-right: var(--spacing-xs);
+            color: var(--accent-color);
+        }
+        
+        .competency-score {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .competency-comment {
+            margin-top: var(--spacing-sm);
+            padding-top: var(--spacing-sm);
+            border-top: 1px dashed var(--border-color);
+        }
+        
+        .comment-label {
+            font-size: var(--font-size-sm);
+            color: var(--text-light);
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .comment-text {
+            margin: 0;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-md);
+        }
+        
+        @media (max-width: 768px) {
+            .meta-info {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-sm);
+            }
+            
+            .overall-rating {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .rating-circle {
+                margin-right: 0;
+                margin-bottom: var(--spacing-md);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img alt="" src="../../assets/images/demo.png" />
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="../../index.html"><i class="fas fa-tachometer-alt"></i>儀表板</a>
+                    </li>
+                    <li>
+                        <a href="../employees/employee-list.html"><i class="fas fa-users"></i>員工管理</a>
+                    </li>
+                    <li>
+                        <a href="../organization/org-chart.html"><i class="fas fa-sitemap"></i>組織架構</a>
+                    </li>
+                    <li>
+                        <a href="../attendance/attendance.html"><i class="fas fa-calendar-check"></i>勤惰管理</a>
+                    </li>
+                    <li>
+                        <a href="../payroll/payroll.html"><i class="fas fa-money-bill-wave"></i>薪資與獎金</a>
+                    </li>
+                    <li class="active">
+                        <a href="performance-list.html"><i class="fas fa-chart-line"></i>績效評估</a>
+                    </li>
+                    <li>
+                        <a href="../announcement/announcements.html"><i class="fas fa-bullhorn"></i>公布欄</a>
+                    </li>
+                    <li>
+                        <a href="../reports/reports.html"><i class="fas fa-chart-bar"></i>報表中心</a>
+                    </li>
+                    <li>
+                        <a href="../settings/settings.html"><i class="fas fa-cog"></i>系統設定</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <span class="user-info">
+                    <img src="../../assets/images/user-avatar.jpg" alt="使用者頭像" class="avatar">
+                    <span class="user-name">王小明</span>
+                    <span class="user-role">HR專員</span>
+                </span>
+                <a href="../../login.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2>績效評估詳情</h2>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <input type="text" placeholder="搜尋...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <div class="messages">
+                        <i class="fas fa-envelope"></i>
+                        <span class="badge">5</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <!-- 績效評估頭部資訊 -->
+                <div class="performance-header">
+                    <span class="performance-status status-completed">已完成</span>
+                    
+                    <div class="employee-info">
+                        <img src="../../assets/images/user-avatar.jpg" alt="員工頭像" class="employee-avatar">
+                        <div class="employee-details">
+                            <h3>陳小華</h3>
+                            <p>員工編號：EMP001</p>
+                            <p>人力資源部 - 人資經理</p>
+                        </div>
+                    </div>
+                    
+                    <div class="meta-info">
+                        <div class="meta-item">
+                            <span class="meta-label">評估期間</span>
+                            <span class="meta-value">2023上半年</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">評估人</span>
+                            <span class="meta-value">張經理 (MGR001)</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">完成日期</span>
+                            <span class="meta-value">2023/06/28</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 整體評分區塊 -->
+                <div class="performance-section">
+                    <div class="performance-section-header">
+                        <h4><i class="fas fa-chart-bar"></i> 整體績效評分</h4>
+                    </div>
+                    
+                    <div class="overall-rating">
+                        <div class="rating-circle">4.0</div>
+                        <div class="rating-desc">
+                            <span class="rating-label">總體表現評價</span>
+                            <span class="rating-text">優良</span>
+                            <div class="rating-stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 績效指標評分區塊 -->
+                <div class="performance-section">
+                    <div class="performance-section-header">
+                        <h4><i class="fas fa-tasks"></i> 績效指標評分</h4>
+                    </div>
+                    
+                    <div class="competency-item">
+                        <div class="competency-header">
+                            <h5 class="competency-name">工作績效</h5>
+                            <div class="competency-rating">
+                                <div class="competency-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                                <span class="competency-score">4.0</span>
+                            </div>
+                        </div>
+                        <div class="competency-comment">
+                            <div class="comment-label">評語：</div>
+                            <p class="comment-text">陳小華在本評估期間展現出卓越的工作表現，能夠按時完成所有指派的任務，並且工作質量一致維持在高水平。特別是在處理員工福利改進專案上，表現尤為突出，不僅按時完成，還提出了多個有效的優化建議，為部門節省了大量成本。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="competency-item">
+                        <div class="competency-header">
+                            <h5 class="competency-name">專業知識與技能</h5>
+                            <div class="competency-rating">
+                                <div class="competency-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <span class="competency-score">5.0</span>
+                            </div>
+                        </div>
+                        <div class="competency-comment">
+                            <div class="comment-label">評語：</div>
+                            <p class="comment-text">陳小華在人力資源管理領域擁有豐富的專業知識和經驗。她不僅對招聘流程、績效管理和員工關係等核心領域有深入理解，還持續透過研討會和專業課程保持知識更新。在最近更新的人資系統導入過程中，她展現了極強的系統操作能力和問題解決能力。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="competency-item">
+                        <div class="competency-header">
+                            <h5 class="competency-name">團隊合作</h5>
+                            <div class="competency-rating">
+                                <div class="competency-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                                <span class="competency-score">4.0</span>
+                            </div>
+                        </div>
+                        <div class="competency-comment">
+                            <div class="comment-label">評語：</div>
+                            <p class="comment-text">陳小華是團隊中的積極合作者，總是願意分享知識和經驗，協助同事解決問題。在跨部門合作專案中，她能夠有效協調各方意見，推動專案順利進行。雖然有時在高壓環境下可能會顯得過於專注於自己的工作，但整體而言她是一個值得信賴的團隊成員。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="competency-item">
+                        <div class="competency-header">
+                            <h5 class="competency-name">溝通能力</h5>
+                            <div class="competency-rating">
+                                <div class="competency-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                                <span class="competency-score">3.0</span>
+                            </div>
+                        </div>
+                        <div class="competency-comment">
+                            <div class="comment-label">評語：</div>
+                            <p class="comment-text">陳小華的書面溝通能力非常強，能夠撰寫清晰、專業的報告和提案。然而，在口頭溝通方面，特別是在大型會議上發表意見時，偶爾會顯得較為保守。建議她可以參加一些公開演講或溝通技巧課程，進一步提升這方面的能力。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="competency-item">
+                        <div class="competency-header">
+                            <h5 class="competency-name">創新能力</h5>
+                            <div class="competency-rating">
+                                <div class="competency-stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                                <span class="competency-score">4.0</span>
+                            </div>
+                        </div>
+                        <div class="competency-comment">
+                            <div class="comment-label">評語：</div>
+                            <p class="comment-text">陳小華在提出創新解決方案方面表現出色，特別是在優化招聘流程和改進員工福利計劃上。她能夠從多角度思考問題，並提出兼顧效率與員工滿意度的解決方案。在公司文化建設方面，她也提出了數個有創意且實用的建議，為公司營造更積極的工作環境。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 總評區塊 -->
+                <div class="performance-section">
+                    <div class="performance-section-header">
+                        <h4><i class="fas fa-comment-dots"></i> 總體評價</h4>
+                    </div>
+                    
+                    <div class="competency-item">
+                        <div class="competency-header">
+                            <h5 class="competency-name">整體表現優點</h5>
+                        </div>
+                        <div class="competency-comment">
+                            <p class="comment-text">陳小華是人力資源部的重要資產，她在專業知識應用和工作績效方面表現尤為出色。她對人力資源實務有深入理解，能夠在各種挑戰中保持高效率和專業水準。她對公司政策的熟悉程度使她能夠準確解答員工疑問，並為管理層提供有價值的人力資源建議。此外，她的責任心強，即使面對複雜任務也能保持積極態度，展現出良好的工作熱情。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="competency-item">
+                        <div class="competency-header">
+                            <h5 class="competency-name">需要改進的地方</h5>
+                        </div>
+                        <div class="competency-comment">
+                            <p class="comment-text">雖然陳小華在書面溝通方面表現出色，但在大型會議上的發言和公開演講方面仍有提升空間。此外，有時候她可能過度關注細節，這雖然保證了工作質量，但有時會影響整體效率。建議她在保持細節關注的同時，更加注重任務的優先順序和時間管理。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="competency-item">
+                        <div class="competency-header">
+                            <h5 class="competency-name">發展計畫與目標</h5>
+                        </div>
+                        <div class="competency-comment">
+                            <p class="comment-text">1. 參加公開演講或溝通技巧培訓，提升口頭表達和大型會議發言能力。<br>
+                            2. 參與跨部門專案領導角色，增加領導經驗。<br>
+                            3. 學習最新的人力資源分析工具和技術，提升數據分析能力。<br>
+                            4. 指導新進人力資源專員，發展培訓和指導技能。<br>
+                            5. 制定更有效的時間管理策略，平衡細節關注和整體效率。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-outline-secondary" onclick="window.location.href='performance-list.html'"><i class="fas fa-arrow-left"></i> 返回列表</button>
+                    <button class="btn btn-outline-secondary"><i class="fas fa-print"></i> 列印評估報告</button>
+                    <button class="btn btn-primary"><i class="fas fa-edit"></i> 編輯評估</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../../assets/js/main.js"></script>
+</body>
+</html> 

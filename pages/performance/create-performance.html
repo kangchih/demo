@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新增績效評估 - DEMO人力資源管理系統</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        /* Page specific styles */
+        .performance-form {
+            display: grid;
+            gap: var(--spacing-md);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--spacing-md);
+        }
+        
+        .form-col-4 {
+            grid-column: span 4;
+        }
+        
+        .form-col-6 {
+            grid-column: span 6;
+        }
+        
+        .form-col-8 {
+            grid-column: span 8;
+        }
+        
+        .form-col-12 {
+            grid-column: span 12;
+        }
+        
+        @media (max-width: 992px) {
+            .form-col-4, .form-col-6, .form-col-8 {
+                grid-column: span 12;
+            }
+        }
+        
+        .employee-select {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .employee-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .rating-group {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .rating-group label {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .rating-stars {
+            display: flex;
+            align-items: center;
+            font-size: var(--font-size-lg);
+        }
+        
+        .rating-stars i {
+            color: var(--bg-gray);
+            cursor: pointer;
+            margin-right: 2px;
+            transition: color var(--transition-fast);
+        }
+        
+        .rating-stars i.active {
+            color: var(--accent-color);
+        }
+        
+        .rating-stars i:hover,
+        .rating-stars i:hover ~ i {
+            color: var(--accent-color);
+        }
+        
+        .rating-value {
+            font-weight: 500;
+            margin-left: var(--spacing-sm);
+            min-width: 30px;
+            text-align: center;
+        }
+        
+        .competency-item {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-sm);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .competency-item .title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .competency-item h4 {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .competency-item .description {
+            color: var(--text-light);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-lg);
+        }
+        
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .form-header h3 {
+            margin: 0;
+        }
+        
+        .form-section {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-sm);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .form-section-header {
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .form-section-header h4 {
+            margin: 0;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img alt="" src="../../assets/images/demo.png" />
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="../../index.html"><i class="fas fa-tachometer-alt"></i>儀表板</a>
+                    </li>
+                    <li>
+                        <a href="../employees/employee-list.html"><i class="fas fa-users"></i>員工管理</a>
+                    </li>
+                    <li>
+                        <a href="../organization/org-chart.html"><i class="fas fa-sitemap"></i>組織架構</a>
+                    </li>
+                    <li>
+                        <a href="../attendance/attendance.html"><i class="fas fa-calendar-check"></i>勤惰管理</a>
+                    </li>
+                    <li>
+                        <a href="../payroll/payroll.html"><i class="fas fa-money-bill-wave"></i>薪資與獎金</a>
+                    </li>
+                    <li class="active">
+                        <a href="performance-list.html"><i class="fas fa-chart-line"></i>績效評估</a>
+                    </li>
+                    <li>
+                        <a href="../announcement/announcements.html"><i class="fas fa-bullhorn"></i>公布欄</a>
+                    </li>
+                    <li>
+                        <a href="../reports/reports.html"><i class="fas fa-chart-bar"></i>報表中心</a>
+                    </li>
+                    <li>
+                        <a href="../settings/settings.html"><i class="fas fa-cog"></i>系統設定</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <span class="user-info">
+                    <img src="../../assets/images/user-avatar.jpg" alt="使用者頭像" class="avatar">
+                    <span class="user-name">王小明</span>
+                    <span class="user-role">HR專員</span>
+                </span>
+                <a href="../../login.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2>新增績效評估</h2>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <input type="text" placeholder="搜尋...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <div class="messages">
+                        <i class="fas fa-envelope"></i>
+                        <span class="badge">5</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>績效評估表</h3>
+                        <div>
+                            <button class="btn btn-outline-secondary"><i class="fas fa-save"></i> 儲存草稿</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form class="performance-form">
+                            <!-- 基本資訊區塊 -->
+                            <div class="form-section">
+                                <div class="form-section-header">
+                                    <h4><i class="fas fa-info-circle"></i> 基本資訊</h4>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-col-6">
+                                        <div class="form-group">
+                                            <label>員工選擇 <span class="text-danger">*</span></label>
+                                            <div class="employee-select">
+                                                <img src="../../assets/images/user-avatar.jpg" alt="員工頭像" class="employee-avatar">
+                                                <select class="form-control" required>
+                                                    <option value="">請選擇員工</option>
+                                                    <option value="EMP001" selected>陳小華 (EMP001)</option>
+                                                    <option value="EMP002">李大明 (EMP002)</option>
+                                                    <option value="EMP003">王小美 (EMP003)</option>
+                                                    <option value="EMP004">張小龍 (EMP004)</option>
+                                                    <option value="EMP005">林小玲 (EMP005)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-col-6">
+                                        <div class="form-group">
+                                            <label>評估期間 <span class="text-danger">*</span></label>
+                                            <select class="form-control" required>
+                                                <option value="">請選擇評估期間</option>
+                                                <option value="2023-1" selected>2023上半年</option>
+                                                <option value="2023-2">2023下半年</option>
+                                                <option value="2022-1">2022上半年</option>
+                                                <option value="2022-2">2022下半年</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-col-4">
+                                        <div class="form-group">
+                                            <label>部門</label>
+                                            <input type="text" class="form-control" value="人力資源部" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-col-4">
+                                        <div class="form-group">
+                                            <label>職位</label>
+                                            <input type="text" class="form-control" value="人資經理" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-col-4">
+                                        <div class="form-group">
+                                            <label>入職日期</label>
+                                            <input type="text" class="form-control" value="2018/05/12" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-col-6">
+                                        <div class="form-group">
+                                            <label>評估人 <span class="text-danger">*</span></label>
+                                            <select class="form-control" required>
+                                                <option value="">請選擇評估人</option>
+                                                <option value="MGR001" selected>張經理 (MGR001)</option>
+                                                <option value="MGR002">劉經理 (MGR002)</option>
+                                                <option value="MGR003">黃經理 (MGR003)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-col-6">
+                                        <div class="form-group">
+                                            <label>截止日期 <span class="text-danger">*</span></label>
+                                            <input type="date" class="form-control" value="2023-06-30" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 績效評分區塊 -->
+                            <div class="form-section">
+                                <div class="form-section-header">
+                                    <h4><i class="fas fa-star"></i> 績效指標評分</h4>
+                                </div>
+                                
+                                <div class="competency-item">
+                                    <div class="title">
+                                        <h4>工作績效</h4>
+                                        <div class="rating-stars" data-rating="0" data-target="performance-rating">
+                                            <i class="far fa-star" data-value="1"></i>
+                                            <i class="far fa-star" data-value="2"></i>
+                                            <i class="far fa-star" data-value="3"></i>
+                                            <i class="far fa-star" data-value="4"></i>
+                                            <i class="far fa-star" data-value="5"></i>
+                                            <span class="rating-value">0</span>
+                                            <input type="hidden" name="performance-rating" value="0">
+                                        </div>
+                                    </div>
+                                    <div class="description">
+                                        評估員工的工作成果、質量、效率和達成目標的能力。
+                                    </div>
+                                    <div class="form-group">
+                                        <label>評語</label>
+                                        <textarea class="form-control" rows="3" placeholder="請輸入對此項目的評語..."></textarea>
+                                    </div>
+                                </div>
+                                
+                                <div class="competency-item">
+                                    <div class="title">
+                                        <h4>專業知識與技能</h4>
+                                        <div class="rating-stars" data-rating="0" data-target="knowledge-rating">
+                                            <i class="far fa-star" data-value="1"></i>
+                                            <i class="far fa-star" data-value="2"></i>
+                                            <i class="far fa-star" data-value="3"></i>
+                                            <i class="far fa-star" data-value="4"></i>
+                                            <i class="far fa-star" data-value="5"></i>
+                                            <span class="rating-value">0</span>
+                                            <input type="hidden" name="knowledge-rating" value="0">
+                                        </div>
+                                    </div>
+                                    <div class="description">
+                                        評估員工的專業知識水平和技能應用能力。
+                                    </div>
+                                    <div class="form-group">
+                                        <label>評語</label>
+                                        <textarea class="form-control" rows="3" placeholder="請輸入對此項目的評語..."></textarea>
+                                    </div>
+                                </div>
+                                
+                                <div class="competency-item">
+                                    <div class="title">
+                                        <h4>團隊合作</h4>
+                                        <div class="rating-stars" data-rating="0" data-target="teamwork-rating">
+                                            <i class="far fa-star" data-value="1"></i>
+                                            <i class="far fa-star" data-value="2"></i>
+                                            <i class="far fa-star" data-value="3"></i>
+                                            <i class="far fa-star" data-value="4"></i>
+                                            <i class="far fa-star" data-value="5"></i>
+                                            <span class="rating-value">0</span>
+                                            <input type="hidden" name="teamwork-rating" value="0">
+                                        </div>
+                                    </div>
+                                    <div class="description">
+                                        評估員工與團隊成員合作的能力和貢獻。
+                                    </div>
+                                    <div class="form-group">
+                                        <label>評語</label>
+                                        <textarea class="form-control" rows="3" placeholder="請輸入對此項目的評語..."></textarea>
+                                    </div>
+                                </div>
+                                
+                                <div class="competency-item">
+                                    <div class="title">
+                                        <h4>溝通能力</h4>
+                                        <div class="rating-stars" data-rating="0" data-target="communication-rating">
+                                            <i class="far fa-star" data-value="1"></i>
+                                            <i class="far fa-star" data-value="2"></i>
+                                            <i class="far fa-star" data-value="3"></i>
+                                            <i class="far fa-star" data-value="4"></i>
+                                            <i class="far fa-star" data-value="5"></i>
+                                            <span class="rating-value">0</span>
+                                            <input type="hidden" name="communication-rating" value="0">
+                                        </div>
+                                    </div>
+                                    <div class="description">
+                                        評估員工的口頭和書面溝通能力。
+                                    </div>
+                                    <div class="form-group">
+                                        <label>評語</label>
+                                        <textarea class="form-control" rows="3" placeholder="請輸入對此項目的評語..."></textarea>
+                                    </div>
+                                </div>
+                                
+                                <div class="competency-item">
+                                    <div class="title">
+                                        <h4>創新能力</h4>
+                                        <div class="rating-stars" data-rating="0" data-target="innovation-rating">
+                                            <i class="far fa-star" data-value="1"></i>
+                                            <i class="far fa-star" data-value="2"></i>
+                                            <i class="far fa-star" data-value="3"></i>
+                                            <i class="far fa-star" data-value="4"></i>
+                                            <i class="far fa-star" data-value="5"></i>
+                                            <span class="rating-value">0</span>
+                                            <input type="hidden" name="innovation-rating" value="0">
+                                        </div>
+                                    </div>
+                                    <div class="description">
+                                        評估員工提出創新解決方案和改進建議的能力。
+                                    </div>
+                                    <div class="form-group">
+                                        <label>評語</label>
+                                        <textarea class="form-control" rows="3" placeholder="請輸入對此項目的評語..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 總評區塊 -->
+                            <div class="form-section">
+                                <div class="form-section-header">
+                                    <h4><i class="fas fa-comment-dots"></i> 總體評價</h4>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-col-12">
+                                        <div class="form-group">
+                                            <label>整體表現優點</label>
+                                            <textarea class="form-control" rows="4" placeholder="請描述員工的優點和貢獻..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-col-12">
+                                        <div class="form-group">
+                                            <label>需要改進的地方</label>
+                                            <textarea class="form-control" rows="4" placeholder="請描述員工需要改進的地方..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-col-12">
+                                        <div class="form-group">
+                                            <label>發展計畫與目標</label>
+                                            <textarea class="form-control" rows="4" placeholder="請提出未來發展計畫和目標建議..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-col-12">
+                                        <div class="form-group">
+                                            <label>整體評分</label>
+                                            <div class="rating-stars" data-rating="0" data-target="overall-rating">
+                                                <i class="far fa-star" data-value="1"></i>
+                                                <i class="far fa-star" data-value="2"></i>
+                                                <i class="far fa-star" data-value="3"></i>
+                                                <i class="far fa-star" data-value="4"></i>
+                                                <i class="far fa-star" data-value="5"></i>
+                                                <span class="rating-value">0</span>
+                                                <input type="hidden" name="overall-rating" value="0">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="action-buttons">
+                                <button type="button" class="btn btn-outline-secondary" onclick="window.location.href='performance-list.html'">取消</button>
+                                <button type="submit" class="btn btn-primary">提交評估</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../../assets/js/main.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // 初始化評分星星功能
+            initRatingStars();
+        });
+        
+        // 初始化星星評分
+        function initRatingStars() {
+            const ratingGroups = document.querySelectorAll('.rating-stars');
+            
+            ratingGroups.forEach(group => {
+                const stars = group.querySelectorAll('i');
+                const ratingValue = group.querySelector('.rating-value');
+                const hiddenInput = group.querySelector('input[type="hidden"]');
+                const initialRating = parseInt(group.getAttribute('data-rating')) || 0;
+                
+                // 設置初始評分
+                if (initialRating > 0) {
+                    updateRating(stars, ratingValue, hiddenInput, initialRating);
+                }
+                
+                // 點擊星星時更新評分
+                stars.forEach(star => {
+                    star.addEventListener('click', function() {
+                        const value = parseInt(this.getAttribute('data-value'));
+                        updateRating(stars, ratingValue, hiddenInput, value);
+                    });
+                });
+            });
+        }
+        
+        // 更新評分顯示
+        function updateRating(stars, valueDisplay, hiddenInput, rating) {
+            stars.forEach(star => {
+                const starValue = parseInt(star.getAttribute('data-value'));
+                if (starValue <= rating) {
+                    star.className = 'fas fa-star active';
+                } else {
+                    star.className = 'far fa-star';
+                }
+            });
+            
+            valueDisplay.textContent = rating.toFixed(1);
+            hiddenInput.value = rating;
+        }
+    </script>
+</body>
+</html> 
