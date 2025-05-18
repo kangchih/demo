@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>證照管理 - DEMO人力資源管理系統</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        /* Page specific styles */
+        .filter-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+        }
+        
+        .search-filter {
+            display: flex;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+        }
+        
+        .search-filter select,
+        .search-filter input {
+            max-width: 200px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+        
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .stat-card {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: var(--spacing-md);
+            display: flex;
+            align-items: center;
+        }
+        
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: var(--border-radius-sm);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: var(--spacing-md);
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .valid-icon {
+            background-color: rgba(var(--success-rgb), 0.1);
+            color: var(--success-color);
+        }
+        
+        .expiring-icon {
+            background-color: rgba(var(--warning-rgb), 0.1);
+            color: var(--warning-color);
+        }
+        
+        .expired-icon {
+            background-color: rgba(var(--danger-rgb), 0.1);
+            color: var(--danger-color);
+        }
+        
+        .total-icon {
+            background-color: rgba(var(--primary-rgb), 0.1);
+            color: var(--primary-color);
+        }
+        
+        .stat-info {
+            flex: 1;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+            line-height: 1;
+        }
+        
+        .stat-label {
+            font-size: var(--font-size-sm);
+            color: var(--text-light);
+        }
+        
+        .certifications-container {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--spacing-md);
+        }
+        
+        .certifications-list {
+            grid-column: span 8;
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+        
+        .sidebar-container {
+            grid-column: span 4;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+        
+        .sidebar-card {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: var(--spacing-md);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .card-header h3 {
+            margin: 0;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+        
+        .certifications-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .certifications-table th {
+            background-color: var(--bg-lighter);
+            padding: var(--spacing-sm);
+            text-align: left;
+            font-weight: 500;
+            color: var(--text-light);
+            border-bottom: 2px solid var(--border-color);
+            white-space: nowrap;
+        }
+        
+        .certifications-table td {
+            padding: var(--spacing-sm);
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+        
+        .certifications-table tr:hover {
+            background-color: var(--bg-lightest);
+        }
+        
+        .employee-cell {
+            display: flex;
+            align-items: center;
+        }
+        
+        .employee-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: var(--spacing-sm);
+        }
+        
+        .employee-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .employee-name {
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        
+        .employee-position {
+            font-size: var(--font-size-xs);
+            color: var(--text-light);
+        }
+        
+        .certification-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: var(--border-radius-sm);
+            font-size: var(--font-size-xs);
+            font-weight: 500;
+        }
+        
+        .status-valid {
+            background-color: rgba(var(--success-rgb), 0.1);
+            color: var(--success-color);
+        }
+        
+        .status-expiring {
+            background-color: rgba(var(--warning-rgb), 0.1);
+            color: var(--warning-color);
+        }
+        
+        .status-expired {
+            background-color: rgba(var(--danger-rgb), 0.1);
+            color: var(--danger-color);
+        }
+        
+        .action-cell {
+            display: flex;
+            gap: var(--spacing-xs);
+        }
+        
+        .action-btn {
+            font-size: var(--font-size-sm);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-lighter);
+            color: var(--text-light);
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .action-btn:hover {
+            background-color: var(--primary-color);
+            color: var(--text-white);
+        }
+        
+        .certification-type-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: var(--border-radius-sm);
+            font-size: var(--font-size-xs);
+            background-color: var(--bg-lighter);
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: var(--spacing-lg);
+            gap: var(--spacing-xs);
+        }
+        
+        .page-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 32px;
+            border-radius: var(--border-radius-sm);
+            padding: 0 var(--spacing-xs);
+            background-color: var(--bg-white);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .page-item.active {
+            background-color: var(--primary-color);
+            color: var(--text-white);
+            border-color: var(--primary-color);
+        }
+        
+        .page-item:hover:not(.active) {
+            background-color: var(--bg-lighter);
+        }
+        
+        .upcoming-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+        
+        .upcoming-item {
+            display: flex;
+            padding: var(--spacing-sm);
+            background-color: var(--bg-lighter);
+            border-radius: var(--border-radius-sm);
+            transition: all var(--transition-fast);
+        }
+        
+        .upcoming-item:hover {
+            background-color: rgba(var(--warning-rgb), 0.05);
+        }
+        
+        .upcoming-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--border-radius-sm);
+            background-color: rgba(var(--warning-rgb), 0.1);
+            color: var(--warning-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: var(--spacing-md);
+            flex-shrink: 0;
+        }
+        
+        .upcoming-details {
+            flex: 1;
+        }
+        
+        .upcoming-title {
+            font-weight: 500;
+            margin-bottom: 2px;
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-dark);
+        }
+        
+        .upcoming-meta {
+            font-size: var(--font-size-xs);
+            color: var(--text-light);
+        }
+        
+        .cert-types-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+        
+        .cert-type-item {
+            display: flex;
+            align-items: center;
+            padding: var(--spacing-sm);
+            background-color: var(--bg-lighter);
+            border-radius: var(--border-radius-sm);
+            transition: all var(--transition-fast);
+        }
+        
+        .cert-type-item:hover {
+            background-color: rgba(var(--primary-rgb), 0.05);
+        }
+        
+        .cert-type-count {
+            background-color: var(--primary-color);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--font-size-xs);
+            margin-left: auto;
+        }
+        
+        .training-date-picker {
+            margin-top: var(--spacing-md);
+        }
+        
+        .date-selector {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-sm);
+        }
+        
+        .date-input {
+            flex: 1;
+        }
+        
+        .date-input input {
+            width: 100%;
+        }
+        
+        @media (max-width: 1200px) {
+            .stats-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .certifications-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .certifications-list,
+            .sidebar-container {
+                grid-column: span 1;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .filter-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .action-buttons {
+                margin-top: var(--spacing-sm);
+                width: 100%;
+                justify-content: flex-end;
+            }
+            
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img alt="" src="../../assets/images/demo.png" />
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="../../index.html"><i class="fas fa-tachometer-alt"></i>儀表板</a>
+                    </li>
+                    <li>
+                        <a href="../employees/employee-list.html"><i class="fas fa-users"></i>員工管理</a>
+                    </li>
+                    <li>
+                        <a href="../organization/org-chart.html"><i class="fas fa-sitemap"></i>組織架構</a>
+                    </li>
+                    <li>
+                        <a href="../attendance/attendance.html"><i class="fas fa-calendar-check"></i>勤惰管理</a>
+                    </li>
+                    <li>
+                        <a href="../payroll/payroll.html"><i class="fas fa-money-bill-wave"></i>薪資與獎金</a>
+                    </li>
+                    <li class="active">
+                        <a href="training-dashboard.html"><i class="fas fa-graduation-cap"></i>教育訓練</a>
+                    </li>
+                    <li>
+                        <a href="../performance/performance-list.html"><i class="fas fa-chart-line"></i>績效評估</a>
+                    </li>
+                    <li>
+                        <a href="../announcement/announcements.html"><i class="fas fa-bullhorn"></i>公布欄</a>
+                    </li>
+                    <li>
+                        <a href="../operations/operation-records.html"><i class="fas fa-history"></i>操作紀錄</a>
+                    </li>
+                    <li>
+                        <a href="../reports/reports.html"><i class="fas fa-chart-bar"></i>報表中心</a>
+                    </li>
+                    <li>
+                        <a href="../settings/settings.html"><i class="fas fa-cog"></i>系統設定</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <span class="user-info">
+                    <img src="../../assets/images/user-avatar.jpg" alt="使用者頭像" class="avatar">
+                    <span class="user-name">王小明</span>
+                    <span class="user-role">HR專員</span>
+                </span>
+                <a href="../../login.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <h1 class="page-title">證照管理</h1>
+                    <nav class="breadcrumb">
+                        <a href="../../index.html">首頁</a>
+                        <span class="separator">/</span>
+                        <a href="training-dashboard.html">教育訓練管理</a>
+                        <span class="separator">/</span>
+                        <span class="current">證照管理</span>
+                    </nav>
+                </div>
+                <div class="header-right">
+                    <div class="header-actions">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-plus"></i>新增證照記錄
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <!-- Stats Cards -->
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <div class="stat-icon total-icon">
+                            <i class="fas fa-certificate"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value">186</div>
+                            <div class="stat-label">總證照數量</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon valid-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value">142</div>
+                            <div class="stat-label">有效證照</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon expiring-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value">28</div>
+                            <div class="stat-label">即將到期</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon expired-icon">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value">16</div>
+                            <div class="stat-label">已過期證照</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Filter Bar -->
+                <div class="filter-bar">
+                    <div class="search-filter">
+                        <input type="text" class="form-control" placeholder="搜尋證照或人員...">
+                        <select class="form-control">
+                            <option value="">證照類型 (全部)</option>
+                            <option value="travel">旅遊類</option>
+                            <option value="safety">安全類</option>
+                            <option value="management">管理類</option>
+                            <option value="language">語言類</option>
+                            <option value="tech">技術類</option>
+                        </select>
+                        <select class="form-control">
+                            <option value="">證照狀態 (全部)</option>
+                            <option value="valid">有效</option>
+                            <option value="expiring">即將到期</option>
+                            <option value="expired">已過期</option>
+                        </select>
+                        <select class="form-control">
+                            <option value="">部門 (全部)</option>
+                            <option value="sales">業務部</option>
+                            <option value="ops">營運部</option>
+                            <option value="customer">客服部</option>
+                            <option value="finance">財務部</option>
+                        </select>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-outline">
+                            <i class="fas fa-filter"></i>進階篩選
+                        </button>
+                        <button class="btn btn-outline">
+                            <i class="fas fa-file-export"></i>匯出報表
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="certifications-container">
+                    <!-- Certifications List -->
+                    <div class="certifications-list">
+                        <div class="table-container">
+                            <table class="certifications-table">
+                                <thead>
+                                    <tr>
+                                        <th>員工</th>
+                                        <th>證照名稱</th>
+                                        <th>證照類型</th>
+                                        <th>核發機構</th>
+                                        <th>取得日期</th>
+                                        <th>到期日期</th>
+                                        <th>狀態</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="employee-cell">
+                                                <img src="https://via.placeholder.com/36?text=張" alt="員工頭像" class="employee-avatar">
+                                                <div class="employee-info">
+                                                    <div class="employee-name">張育誠</div>
+                                                    <div class="employee-position">資深旅遊顧問</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>旅遊業務管理師</td>
+                                        <td><span class="certification-type-tag">管理類</span></td>
+                                        <td>台灣觀光協會</td>
+                                        <td>2022/05/15</td>
+                                        <td>2025/05/15</td>
+                                        <td><span class="certification-status status-valid">有效</span></td>
+                                        <td class="action-cell">
+                                            <button class="action-btn" title="查看詳情"><i class="fas fa-eye"></i></button>
+                                            <button class="action-btn" title="編輯"><i class="fas fa-pen"></i></button>
+                                            <button class="action-btn" title="刪除"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="employee-cell">
+                                                <img src="https://via.placeholder.com/36?text=李" alt="員工頭像" class="employee-avatar">
+                                                <div class="employee-info">
+                                                    <div class="employee-name">李翔宇</div>
+                                                    <div class="employee-position">航空票務專員</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>急救訓練證明</td>
+                                        <td><span class="certification-type-tag">安全類</span></td>
+                                        <td>紅十字會</td>
+                                        <td>2021/08/10</td>
+                                        <td>2023/12/15</td>
+                                        <td><span class="certification-status status-expiring">即將到期</span></td>
+                                        <td class="action-cell">
+                                            <button class="action-btn" title="查看詳情"><i class="fas fa-eye"></i></button>
+                                            <button class="action-btn" title="編輯"><i class="fas fa-pen"></i></button>
+                                            <button class="action-btn" title="刪除"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="employee-cell">
+                                                <img src="https://via.placeholder.com/36?text=王" alt="員工頭像" class="employee-avatar">
+                                                <div class="employee-info">
+                                                    <div class="employee-name">王美玲</div>
+                                                    <div class="employee-position">資深導遊</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>導遊人員執業證</td>
+                                        <td><span class="certification-type-tag">旅遊類</span></td>
+                                        <td>交通部觀光局</td>
+                                        <td>2020/03/25</td>
+                                        <td>2023/03/25</td>
+                                        <td><span class="certification-status status-expired">已過期</span></td>
+                                        <td class="action-cell">
+                                            <button class="action-btn" title="查看詳情"><i class="fas fa-eye"></i></button>
+                                            <button class="action-btn" title="編輯"><i class="fas fa-pen"></i></button>
+                                            <button class="action-btn" title="刪除"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="employee-cell">
+                                                <img src="https://via.placeholder.com/36?text=陳" alt="員工頭像" class="employee-avatar">
+                                                <div class="employee-info">
+                                                    <div class="employee-name">陳俊豪</div>
+                                                    <div class="employee-position">系統工程師</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>航空旅遊資料管理認證</td>
+                                        <td><span class="certification-type-tag">技術類</span></td>
+                                        <td>國際航空資訊協會</td>
+                                        <td>2022/11/01</td>
+                                        <td>2024/11/01</td>
+                                        <td><span class="certification-status status-valid">有效</span></td>
+                                        <td class="action-cell">
+                                            <button class="action-btn" title="查看詳情"><i class="fas fa-eye"></i></button>
+                                            <button class="action-btn" title="編輯"><i class="fas fa-pen"></i></button>
+                                            <button class="action-btn" title="刪除"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="employee-cell">
+                                                <img src="https://via.placeholder.com/36?text=林" alt="員工頭像" class="employee-avatar">
+                                                <div class="employee-info">
+                                                    <div class="employee-name">林佳穎</div>
+                                                    <div class="employee-position">國際領隊</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>外語能力認證 (英語)</td>
+                                        <td><span class="certification-type-tag">語言類</span></td>
+                                        <td>多益測驗中心</td>
+                                        <td>2023/02/18</td>
+                                        <td>永久有效</td>
+                                        <td><span class="certification-status status-valid">有效</span></td>
+                                        <td class="action-cell">
+                                            <button class="action-btn" title="查看詳情"><i class="fas fa-eye"></i></button>
+                                            <button class="action-btn" title="編輯"><i class="fas fa-pen"></i></button>
+                                            <button class="action-btn" title="刪除"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="employee-cell">
+                                                <img src="https://via.placeholder.com/36?text=黃" alt="員工頭像" class="employee-avatar">
+                                                <div class="employee-info">
+                                                    <div class="employee-name">黃志豪</div>
+                                                    <div class="employee-position">旅遊產品經理</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>旅遊產品規劃師</td>
+                                        <td><span class="certification-type-tag">管理類</span></td>
+                                        <td>亞太旅遊協會</td>
+                                        <td>2022/07/12</td>
+                                        <td>2025/07/12</td>
+                                        <td><span class="certification-status status-valid">有效</span></td>
+                                        <td class="action-cell">
+                                            <button class="action-btn" title="查看詳情"><i class="fas fa-eye"></i></button>
+                                            <button class="action-btn" title="編輯"><i class="fas fa-pen"></i></button>
+                                            <button class="action-btn" title="刪除"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="pagination">
+                            <div class="page-item"><i class="fas fa-chevron-left"></i></div>
+                            <div class="page-item active">1</div>
+                            <div class="page-item">2</div>
+                            <div class="page-item">3</div>
+                            <div class="page-item">4</div>
+                            <div class="page-item"><i class="fas fa-chevron-right"></i></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sidebar -->
+                    <div class="sidebar-container">
+                        <!-- Upcoming Expirations -->
+                        <div class="sidebar-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-exclamation-triangle"></i> 即將到期證照</h3>
+                            </div>
+                            <div class="upcoming-list">
+                                <div class="upcoming-item">
+                                    <div class="upcoming-icon">
+                                        <i class="fas fa-calendar-times"></i>
+                                    </div>
+                                    <div class="upcoming-details">
+                                        <div class="upcoming-title">
+                                            <span>急救訓練證明</span>
+                                            <small>15天後</small>
+                                        </div>
+                                        <div class="upcoming-meta">
+                                            持有人: 李翔宇 (航空票務專員)
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="upcoming-item">
+                                    <div class="upcoming-icon">
+                                        <i class="fas fa-calendar-times"></i>
+                                    </div>
+                                    <div class="upcoming-details">
+                                        <div class="upcoming-title">
+                                            <span>航空安全培訓證書</span>
+                                            <small>28天後</small>
+                                        </div>
+                                        <div class="upcoming-meta">
+                                            持有人: 張雅琪 (航空服務主管)
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="upcoming-item">
+                                    <div class="upcoming-icon">
+                                        <i class="fas fa-calendar-times"></i>
+                                    </div>
+                                    <div class="upcoming-details">
+                                        <div class="upcoming-title">
+                                            <span>旅遊風險評估師</span>
+                                            <small>32天後</small>
+                                        </div>
+                                        <div class="upcoming-meta">
+                                            持有人: 吳建宏 (安全主管)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="text-align: center; margin-top: var(--spacing-md);">
+                                <a href="#" style="color: var(--primary-color); font-size: var(--font-size-sm);">
+                                    查看全部 <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Certificate Types -->
+                        <div class="sidebar-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-tags"></i> 證照分類</h3>
+                            </div>
+                            <div class="cert-types-list">
+                                <div class="cert-type-item">
+                                    <span>旅遊類證照</span>
+                                    <span class="cert-type-count">64</span>
+                                </div>
+                                <div class="cert-type-item">
+                                    <span>安全類證照</span>
+                                    <span class="cert-type-count">42</span>
+                                </div>
+                                <div class="cert-type-item">
+                                    <span>管理類證照</span>
+                                    <span class="cert-type-count">35</span>
+                                </div>
+                                <div class="cert-type-item">
+                                    <span>語言類證照</span>
+                                    <span class="cert-type-count">28</span>
+                                </div>
+                                <div class="cert-type-item">
+                                    <span>技術類證照</span>
+                                    <span class="cert-type-count">17</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Training Schedule -->
+                        <div class="sidebar-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-calendar-alt"></i> 證照培訓日程</h3>
+                            </div>
+                            <p>安排相關證照的培訓或更新課程：</p>
+                            <div class="training-date-picker">
+                                <label for="training-type">培訓類型</label>
+                                <select id="training-type" class="form-control">
+                                    <option value="">請選擇培訓類型</option>
+                                    <option value="new">新證照培訓</option>
+                                    <option value="renewal">證照更新課程</option>
+                                    <option value="exam">證照考試準備</option>
+                                </select>
+                            </div>
+                            <div class="training-date-picker">
+                                <label>培訓日期</label>
+                                <div class="date-selector">
+                                    <div class="date-input">
+                                        <input type="date" class="form-control">
+                                    </div>
+                                    <button class="btn btn-outline">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div style="text-align: center; margin-top: var(--spacing-md);">
+                                <button class="btn btn-primary btn-sm">
+                                    安排證照培訓
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../../assets/js/script.js"></script>
+</body>
+</html> 

@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教育訓練管理 - DEMO人力資源管理系統</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        /* Page specific styles */
+        .training-dashboard {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--spacing-md);
+        }
+        
+        .training-card {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow var(--transition-fast);
+            overflow: hidden;
+            padding: var(--spacing-md);
+        }
+        
+        .training-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+        
+        .training-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .training-card-header h3 {
+            margin: 0;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        .training-card-header .card-action {
+            color: var(--primary-color);
+            font-size: var(--font-size-sm);
+        }
+        
+        .featured-courses {
+            grid-column: span 8;
+        }
+        
+        .training-calendar {
+            grid-column: span 4;
+        }
+        
+        .completion-stats {
+            grid-column: span 6;
+        }
+        
+        .upcoming-trainings {
+            grid-column: span 6;
+        }
+        
+        .certification-tracking {
+            grid-column: span 12;
+        }
+        
+        /* Course card styles */
+        .course-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--spacing-md);
+        }
+        
+        .course-card {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-sm);
+            box-shadow: var(--shadow-xs);
+            overflow: hidden;
+            transition: all var(--transition-fast);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .course-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .course-image {
+            height: 140px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .course-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .course-type {
+            position: absolute;
+            top: var(--spacing-xs);
+            right: var(--spacing-xs);
+            background-color: var(--primary-color);
+            color: var(--text-white);
+            padding: 2px 8px;
+            border-radius: var(--border-radius-sm);
+            font-size: var(--font-size-xs);
+            font-weight: 500;
+        }
+        
+        .course-content {
+            padding: var(--spacing-sm);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .course-title {
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+            color: var(--text-dark);
+        }
+        
+        .course-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: var(--spacing-xs);
+            font-size: var(--font-size-xs);
+            color: var(--text-light);
+        }
+        
+        .course-info i {
+            color: var(--primary-color);
+            margin-right: var(--spacing-xs);
+            width: 14px;
+        }
+        
+        .course-progress {
+            margin-top: auto;
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background-color: var(--bg-lighter);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+        }
+        
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: var(--font-size-xs);
+            color: var(--text-light);
+        }
+        
+        /* Calendar styles */
+        .mini-calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .calendar-nav {
+            display: flex;
+            gap: var(--spacing-xs);
+        }
+        
+        .calendar-nav button {
+            background: none;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .calendar-nav button:hover {
+            background-color: var(--bg-lighter);
+            color: var(--primary-color);
+        }
+        
+        .weekday {
+            text-align: center;
+            font-size: var(--font-size-xs);
+            color: var(--text-light);
+            font-weight: 500;
+            padding: var(--spacing-xs) 0;
+        }
+        
+        .day {
+            text-align: center;
+            padding: var(--spacing-xs);
+            font-size: var(--font-size-xs);
+            border-radius: var(--border-radius-xs);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .day:hover {
+            background-color: var(--bg-lighter);
+        }
+        
+        .day.has-event {
+            position: relative;
+        }
+        
+        .day.has-event::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+        }
+        
+        .day.today {
+            background-color: var(--primary-color);
+            color: var(--text-white);
+            font-weight: 500;
+        }
+        
+        .day.other-month {
+            color: var(--text-lighter);
+        }
+        
+        /* Stats styles */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-sm);
+        }
+        
+        .stat-box {
+            background-color: var(--bg-lighter);
+            border-radius: var(--border-radius-sm);
+            padding: var(--spacing-sm);
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .stat-label {
+            font-size: var(--font-size-sm);
+            color: var(--text-light);
+        }
+        
+        /* Training schedule styles */
+        .training-schedule-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+        
+        .schedule-item {
+            display: flex;
+            align-items: center;
+            padding: var(--spacing-sm);
+            background-color: var(--bg-lighter);
+            border-radius: var(--border-radius-sm);
+            transition: all var(--transition-fast);
+        }
+        
+        .schedule-item:hover {
+            background-color: rgba(var(--primary-rgb), 0.1);
+        }
+        
+        .schedule-date {
+            background-color: var(--primary-color);
+            color: var(--text-white);
+            border-radius: var(--border-radius-sm);
+            width: 45px;
+            height: 45px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-right: var(--spacing-md);
+            flex-shrink: 0;
+        }
+        
+        .schedule-date .day {
+            font-size: 1.2rem;
+            font-weight: 600;
+            line-height: 1;
+            padding: 0;
+        }
+        
+        .schedule-date .month {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+        }
+        
+        .schedule-details {
+            flex: 1;
+        }
+        
+        .schedule-title {
+            font-weight: 500;
+            margin-bottom: 2px;
+            color: var(--text-dark);
+        }
+        
+        .schedule-info {
+            font-size: var(--font-size-xs);
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+        }
+        
+        .schedule-info i {
+            margin-right: 5px;
+            color: var(--primary-color);
+        }
+        
+        /* Certification table styles */
+        .certification-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .certification-table th {
+            background-color: var(--bg-lighter);
+            padding: var(--spacing-sm);
+            text-align: left;
+            font-weight: 500;
+            color: var(--text-light);
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .certification-table td {
+            padding: var(--spacing-sm);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .certification-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: var(--border-radius-sm);
+            font-size: var(--font-size-xs);
+            font-weight: 500;
+        }
+        
+        .status-valid {
+            background-color: rgba(var(--success-rgb), 0.1);
+            color: var(--success-color);
+        }
+        
+        .status-expiring {
+            background-color: rgba(var(--warning-rgb), 0.1);
+            color: var(--warning-color);
+        }
+        
+        .status-expired {
+            background-color: rgba(var(--danger-rgb), 0.1);
+            color: var(--danger-color);
+        }
+        
+        .action-btn {
+            font-size: var(--font-size-sm);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-lighter);
+            color: var(--text-light);
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .action-btn:hover {
+            background-color: var(--primary-color);
+            color: var(--text-white);
+        }
+        
+        .action-cell {
+            display: flex;
+            gap: var(--spacing-xs);
+        }
+        
+        @media (max-width: 1200px) {
+            .featured-courses {
+                grid-column: span 12;
+            }
+            
+            .training-calendar {
+                grid-column: span 12;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .training-dashboard > div {
+                grid-column: span 12;
+            }
+            
+            .course-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img alt="" src="../../assets/images/demo.png" />
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="../../index.html"><i class="fas fa-tachometer-alt"></i>儀表板</a>
+                    </li>
+                    <li>
+                        <a href="../employees/employee-list.html"><i class="fas fa-users"></i>員工管理</a>
+                    </li>
+                    <li>
+                        <a href="../organization/org-chart.html"><i class="fas fa-sitemap"></i>組織架構</a>
+                    </li>
+                    <li>
+                        <a href="../attendance/attendance.html"><i class="fas fa-calendar-check"></i>勤惰管理</a>
+                    </li>
+                    <li>
+                        <a href="../payroll/payroll.html"><i class="fas fa-money-bill-wave"></i>薪資與獎金</a>
+                    </li>
+                    <li class="active">
+                        <a href="training-dashboard.html"><i class="fas fa-graduation-cap"></i>教育訓練</a>
+                    </li>
+                    <li>
+                        <a href="../performance/performance-list.html"><i class="fas fa-chart-line"></i>績效評估</a>
+                    </li>
+                    <li>
+                        <a href="../announcement/announcements.html"><i class="fas fa-bullhorn"></i>公布欄</a>
+                    </li>
+                    <li>
+                        <a href="../operations/operation-records.html"><i class="fas fa-history"></i>操作紀錄</a>
+                    </li>
+                    <li>
+                        <a href="../reports/reports.html"><i class="fas fa-chart-bar"></i>報表中心</a>
+                    </li>
+                    <li>
+                        <a href="../settings/settings.html"><i class="fas fa-cog"></i>系統設定</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <span class="user-info">
+                    <img src="../../assets/images/user-avatar.jpg" alt="使用者頭像" class="avatar">
+                    <span class="user-name">王小明</span>
+                    <span class="user-role">HR專員</span>
+                </span>
+                <a href="../../login.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <h1 class="page-title">教育訓練管理</h1>
+                    <nav class="breadcrumb">
+                        <a href="../../index.html">首頁</a>
+                        <span class="separator">/</span>
+                        <span class="current">教育訓練管理</span>
+                    </nav>
+                </div>
+                <div class="header-right">
+                    <div class="header-actions">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-plus"></i>新增訓練課程
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <!-- Training Dashboard -->
+                <div class="training-dashboard">
+                    <!-- Featured Courses -->
+                    <div class="training-card featured-courses">
+                        <div class="training-card-header">
+                            <h3><i class="fas fa-book-reader"></i> 熱門課程</h3>
+                            <a href="course-list.html" class="card-action">查看全部 <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                        <div class="course-list">
+                            <!-- Course 1 -->
+                            <div class="course-card">
+                                <div class="course-image">
+                                    <img src="https://via.placeholder.com/300x140?text=航空服務基礎" alt="航空服務基礎">
+                                    <span class="course-type">必修</span>
+                                </div>
+                                <div class="course-content">
+                                    <h4 class="course-title">航空服務基礎訓練</h4>
+                                    <div class="course-info">
+                                        <i class="fas fa-clock"></i> 總時數: 3小時 (12個單元)
+                                    </div>
+                                    <div class="course-info">
+                                        <i class="fas fa-user"></i> 講師: 陳瑞華 (資深空服員)
+                                    </div>
+                                    <div class="course-info">
+                                        <i class="fas fa-users"></i> 已有148人參與學習
+                                    </div>
+                                    <div class="course-info">
+                                        <i class="fas fa-star"></i> 4.8分 (52評分)
+                                    </div>
+                                    <div class="course-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" style="width: 75%;"></div>
+                                        </div>
+                                        <div class="progress-text">
+                                            <span>已完成 75%</span>
+                                            <span>9/12 單元</span>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 10px;">
+                                        <a href="course-detail.html" class="btn btn-sm btn-primary" style="width: 100%; text-align: center;">繼續學習</a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Course 2 -->
+                            <div class="course-card">
+                                <div class="course-image">
+                                    <img src="https://via.placeholder.com/300x140?text=旅行安全" alt="旅行安全與緊急處理">
+                                    <span class="course-type">必修</span>
+                                </div>
+                                <div class="course-content">
+                                    <h4 class="course-title">旅行安全與緊急處理</h4>
+                                    <div class="course-info">
+                                        <i class="fas fa-clock"></i> 總時數: 4小時 (10個單元)
+                                    </div>
+                                    <div class="course-info">
+                                        <i class="fas fa-user"></i> 講師: 林建國 (安全專員)
+                                    </div>
+                                    <div class="course-info">
+                                        <i class="fas fa-users"></i> 已有132人參與學習
+                                    </div>
+                                    <div class="course-info">
+                                        <i class="fas fa-star"></i> 4.6分 (48評分)
+                                    </div>
+                                    <div class="course-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" style="width: 30%;"></div>
+                                        </div>
+                                        <div class="progress-text">
+                                            <span>已完成 30%</span>
+                                            <span>3/10 單元</span>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 10px;">
+                                        <a href="#" class="btn btn-sm btn-primary" style="width: 100%; text-align: center;">繼續學習</a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Course 3 -->
+                            <div class="course-card">
+                                <div class="course-image">
+                                    <img src="https://via.placeholder.com/300x140?text=旅遊行程規劃" alt="旅遊行程規劃">
+                                    <span class="course-type">選修</span>
+                                </div>
+                                <div class="course-content">
+                                    <h4 class="course-title">旅遊行程規劃與設計</h4>
+                                    <div class="course-info">
+                                        <i class="fas fa-clock"></i> 總時數: 5小時 (15個單元)
+                                    </div>
+                                    <div class="course-info">
+                                        <i class="fas fa-user"></i> 講師: 吳美玲 (資深旅遊顧問)
+                                    </div>
+                                    <div class="course-info">
+                                        <i class="fas fa-users"></i> 已有95人參與學習
+                                    </div>
+                                    <div class="course-info">
+                                        <i class="fas fa-star"></i> 4.9分 (31評分)
+                                    </div>
+                                    <div class="course-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" style="width: 0%;"></div>
+                                        </div>
+                                        <div class="progress-text">
+                                            <span>尚未開始</span>
+                                            <span>0/15 單元</span>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 10px;">
+                                        <a href="#" class="btn btn-sm btn-primary" style="width: 100%; text-align: center;">開始學習</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Course 4 -->
+                            <div class="course-card">
+                                <div class="course-image">
+                                    <img src="https://via.placeholder.com/300x140?text=客戶服務技巧" alt="客戶服務技巧">
+                                    <span class="course-type">選修</span>
+                                </div>
+                                <div class="course-content">
+                                    <h4 class="course-title">旅遊客戶服務技巧</h4>
+                                    <div class="course-info">
+                                        <i class="fas fa-clock"></i> 總時數: 3.5小時 (12個單元)
+                                    </div>
+                                    <div class="course-info">
+                                        <i class="fas fa-user"></i> 講師: 林佳穎 (客服主管)
+                                    </div>
+                                    <div class="course-info">
+                                        <i class="fas fa-users"></i> 已有78人參與學習
+                                    </div>
+                                    <div class="course-info">
+                                        <i class="fas fa-star"></i> 4.7分 (22評分)
+                                    </div>
+                                    <div class="course-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" style="width: 0%;"></div>
+                                        </div>
+                                        <div class="progress-text">
+                                            <span>尚未開始</span>
+                                            <span>0/12 單元</span>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 10px;">
+                                        <a href="#" class="btn btn-sm btn-primary" style="width: 100%; text-align: center;">開始學習</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Training Calendar -->
+                    <div class="training-card training-calendar">
+                        <div class="training-card-header">
+                            <h3><i class="fas fa-calendar-alt"></i> 訓練日曆</h3>
+                            <a href="training-calendar.html" class="card-action">月曆檢視 <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                        <div class="calendar-header">
+                            <h4>2023年11月</h4>
+                            <div class="calendar-nav">
+                                <button><i class="fas fa-chevron-left"></i></button>
+                                <button><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+                        <div class="mini-calendar">
+                            <!-- Weekday Headers -->
+                            <div class="weekday">日</div>
+                            <div class="weekday">一</div>
+                            <div class="weekday">二</div>
+                            <div class="weekday">三</div>
+                            <div class="weekday">四</div>
+                            <div class="weekday">五</div>
+                            <div class="weekday">六</div>
+                            
+                            <!-- Days -->
+                            <div class="day other-month">29</div>
+                            <div class="day other-month">30</div>
+                            <div class="day other-month">31</div>
+                            <div class="day">1</div>
+                            <div class="day">2</div>
+                            <div class="day has-event">3</div>
+                            <div class="day">4</div>
+                            <div class="day">5</div>
+                            <div class="day has-event">6</div>
+                            <div class="day">7</div>
+                            <div class="day">8</div>
+                            <div class="day has-event">9</div>
+                            <div class="day">10</div>
+                            <div class="day">11</div>
+                            <div class="day">12</div>
+                            <div class="day today">13</div>
+                            <div class="day">14</div>
+                            <div class="day has-event">15</div>
+                            <div class="day">16</div>
+                            <div class="day">17</div>
+                            <div class="day">18</div>
+                            <div class="day has-event">19</div>
+                            <div class="day">20</div>
+                            <div class="day">21</div>
+                            <div class="day">22</div>
+                            <div class="day">23</div>
+                            <div class="day">24</div>
+                            <div class="day">25</div>
+                            <div class="day has-event">26</div>
+                            <div class="day">27</div>
+                            <div class="day">28</div>
+                            <div class="day">29</div>
+                            <div class="day has-event">30</div>
+                            <div class="day other-month">1</div>
+                            <div class="day other-month">2</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Completion Stats -->
+                    <div class="training-card completion-stats">
+                        <div class="training-card-header">
+                            <h3><i class="fas fa-chart-pie"></i> 完課統計</h3>
+                            <a href="training-stats.html" class="card-action">詳細報表 <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                        <div class="stats-container">
+                            <div class="stat-box">
+                                <div class="stat-value">85%</div>
+                                <div class="stat-label">必修課程完成率</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">45%</div>
+                                <div class="stat-label">選修課程參與率</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">12</div>
+                                <div class="stat-label">本月進行中課程</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">5</div>
+                                <div class="stat-label">即將到期認證</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Upcoming Trainings -->
+                    <div class="training-card upcoming-trainings">
+                        <div class="training-card-header">
+                            <h3><i class="fas fa-bullseye"></i> 即將開始的訓練</h3>
+                            <a href="training-schedule.html" class="card-action">完整日程 <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                        <div class="training-schedule-list">
+                            <div class="schedule-item">
+                                <div class="schedule-date">
+                                    <span class="day">15</span>
+                                    <span class="month">11月</span>
+                                </div>
+                                <div class="schedule-details">
+                                    <h4 class="schedule-title">客訴處理技巧</h4>
+                                    <div class="schedule-info">
+                                        <i class="fas fa-clock"></i> 09:00 - 12:00
+                                        <span class="separator">|</span>
+                                        <i class="fas fa-map-marker-alt"></i> 訓練室 B
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="schedule-item">
+                                <div class="schedule-date">
+                                    <span class="day">19</span>
+                                    <span class="month">11月</span>
+                                </div>
+                                <div class="schedule-details">
+                                    <h4 class="schedule-title">異常天氣應對措施</h4>
+                                    <div class="schedule-info">
+                                        <i class="fas fa-clock"></i> 14:00 - 17:00
+                                        <span class="separator">|</span>
+                                        <i class="fas fa-map-marker-alt"></i> 視訊會議
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="schedule-item">
+                                <div class="schedule-date">
+                                    <span class="day">26</span>
+                                    <span class="month">11月</span>
+                                </div>
+                                <div class="schedule-details">
+                                    <h4 class="schedule-title">旅遊產品定價策略</h4>
+                                    <div class="schedule-info">
+                                        <i class="fas fa-clock"></i> 10:00 - 16:00
+                                        <span class="separator">|</span>
+                                        <i class="fas fa-map-marker-alt"></i> 多功能會議室
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Certification Tracking -->
+                    <div class="training-card certification-tracking">
+                        <div class="training-card-header">
+                            <h3><i class="fas fa-certificate"></i> 證照與認證追蹤</h3>
+                            <a href="certifications.html" class="card-action">管理證照 <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                        <table class="certification-table">
+                            <thead>
+                                <tr>
+                                    <th>證照名稱</th>
+                                    <th>取得日期</th>
+                                    <th>到期日</th>
+                                    <th>狀態</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>旅遊業務管理師</td>
+                                    <td>2022/05/15</td>
+                                    <td>2025/05/15</td>
+                                    <td><span class="certification-status status-valid">有效</span></td>
+                                    <td class="action-cell">
+                                        <button class="action-btn" title="查看詳情"><i class="fas fa-eye"></i></button>
+                                        <button class="action-btn" title="更新證照"><i class="fas fa-pen"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>急救訓練證明</td>
+                                    <td>2021/08/10</td>
+                                    <td>2023/12/15</td>
+                                    <td><span class="certification-status status-expiring">即將到期</span></td>
+                                    <td class="action-cell">
+                                        <button class="action-btn" title="查看詳情"><i class="fas fa-eye"></i></button>
+                                        <button class="action-btn" title="更新證照"><i class="fas fa-pen"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>導遊人員執業證</td>
+                                    <td>2020/03/25</td>
+                                    <td>2023/03/25</td>
+                                    <td><span class="certification-status status-expired">已過期</span></td>
+                                    <td class="action-cell">
+                                        <button class="action-btn" title="查看詳情"><i class="fas fa-eye"></i></button>
+                                        <button class="action-btn" title="更新證照"><i class="fas fa-pen"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>航空旅遊資料管理認證</td>
+                                    <td>2022/11/01</td>
+                                    <td>2024/11/01</td>
+                                    <td><span class="certification-status status-valid">有效</span></td>
+                                    <td class="action-cell">
+                                        <button class="action-btn" title="查看詳情"><i class="fas fa-eye"></i></button>
+                                        <button class="action-btn" title="更新證照"><i class="fas fa-pen"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>外語能力認證 (英語)</td>
+                                    <td>2023/02/18</td>
+                                    <td>永久有效</td>
+                                    <td><span class="certification-status status-valid">有效</span></td>
+                                    <td class="action-cell">
+                                        <button class="action-btn" title="查看詳情"><i class="fas fa-eye"></i></button>
+                                        <button class="action-btn" title="更新證照"><i class="fas fa-pen"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../../assets/js/script.js"></script>
+</body>
+</html> 

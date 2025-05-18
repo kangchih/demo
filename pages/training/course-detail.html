@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>課程詳情 - DEMO人力資源管理系統</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        /* Page specific styles */
+        .course-detail-container {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--spacing-md);
+        }
+        
+        .course-header {
+            grid-column: span 12;
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .course-banner {
+            height: 200px;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-lg);
+            position: relative;
+        }
+        
+        .course-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('https://via.placeholder.com/1200x300?text=航空服務基礎訓練');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.3;
+        }
+        
+        .course-banner-content {
+            position: relative;
+            color: white;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .course-type-badge {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: var(--text-white);
+            padding: 4px 12px;
+            border-radius: var(--border-radius-sm);
+            display: inline-block;
+            margin-bottom: var(--spacing-sm);
+            font-size: var(--font-size-sm);
+        }
+        
+        .course-title {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-md);
+            font-weight: 600;
+        }
+        
+        .course-meta {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-lg);
+            margin-top: var(--spacing-md);
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            color: var(--text-white);
+            font-size: var(--font-size-sm);
+        }
+        
+        .meta-item i {
+            font-size: 1.2rem;
+        }
+        
+        .course-actions {
+            position: absolute;
+            bottom: -25px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .enroll-btn {
+            background-color: var(--success-color);
+            color: white;
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border-radius: var(--border-radius-sm);
+            border: none;
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .enroll-btn:hover {
+            background-color: var(--success-dark);
+            transform: translateY(-2px);
+        }
+        
+        .course-tabs {
+            background-color: var(--bg-white);
+            border-radius: 0 0 var(--border-radius-md) var(--border-radius-md);
+            padding: var(--spacing-md);
+            padding-top: 40px;
+        }
+        
+        .tab-navigation {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .tab-item {
+            padding: var(--spacing-sm) var(--spacing-md);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-weight: 500;
+            color: var(--text-light);
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab-item.active {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+        }
+        
+        .tab-item:hover:not(.active) {
+            color: var(--text-dark);
+            background-color: var(--bg-lighter);
+        }
+        
+        .course-content {
+            grid-column: span 8;
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: var(--spacing-md);
+        }
+        
+        .course-sidebar {
+            grid-column: span 4;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+        
+        .course-progress-card, 
+        .course-instructor-card,
+        .course-resources-card {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: var(--spacing-md);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .card-header h3 {
+            margin: 0;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        .modules-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+        
+        .module-item {
+            background-color: var(--bg-lighter);
+            border-radius: var(--border-radius-sm);
+            padding: var(--spacing-sm);
+            transition: all var(--transition-fast);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .module-item:hover {
+            background-color: rgba(var(--primary-rgb), 0.05);
+        }
+        
+        .module-status {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: var(--spacing-sm);
+            flex-shrink: 0;
+            background-color: var(--bg-white);
+            box-shadow: var(--shadow-xs);
+        }
+        
+        .module-status.completed {
+            background-color: var(--success-color);
+            color: var(--text-white);
+        }
+        
+        .module-status.in-progress {
+            background-color: var(--primary-color);
+            color: var(--text-white);
+        }
+        
+        .module-status.locked {
+            background-color: var(--bg-light);
+            color: var(--text-lighter);
+        }
+        
+        .module-details {
+            flex: 1;
+        }
+        
+        .module-title {
+            font-weight: 500;
+            margin-bottom: 2px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .module-meta {
+            font-size: var(--font-size-xs);
+            color: var(--text-light);
+        }
+        
+        .progress-section {
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-xs);
+            font-weight: 500;
+        }
+        
+        .big-progress-bar {
+            height: 8px;
+            background-color: var(--bg-lighter);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .big-progress-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+        }
+        
+        .instructor-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .instructor-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: var(--spacing-md);
+        }
+        
+        .instructor-details h4 {
+            margin-top: 0;
+            margin-bottom: var(--spacing-xs);
+            font-weight: 600;
+        }
+        
+        .instructor-title {
+            color: var(--text-light);
+            font-size: var(--font-size-sm);
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .instructor-bio {
+            color: var(--text-dark);
+            line-height: 1.5;
+            font-size: var(--font-size-sm);
+        }
+        
+        .resources-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+        
+        .resource-item {
+            display: flex;
+            align-items: center;
+            background-color: var(--bg-lighter);
+            border-radius: var(--border-radius-sm);
+            padding: var(--spacing-sm);
+            transition: all var(--transition-fast);
+        }
+        
+        .resource-item:hover {
+            background-color: rgba(var(--primary-rgb), 0.05);
+        }
+        
+        .resource-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--border-radius-sm);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: var(--spacing-md);
+            flex-shrink: 0;
+            font-size: 1.2rem;
+        }
+        
+        .resource-icon.pdf {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+        
+        .resource-icon.doc {
+            background-color: rgba(13, 110, 253, 0.1);
+            color: #0d6efd;
+        }
+        
+        .resource-icon.video {
+            background-color: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+        }
+        
+        .resource-details {
+            flex: 1;
+        }
+        
+        .resource-title {
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        
+        .resource-meta {
+            font-size: var(--font-size-xs);
+            color: var(--text-light);
+        }
+        
+        .resource-action {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            transition: all var(--transition-fast);
+        }
+        
+        .resource-action:hover {
+            color: var(--primary-dark);
+        }
+        
+        .course-description {
+            line-height: 1.6;
+            color: var(--text-dark);
+        }
+        
+        .course-description h3 {
+            margin-top: var(--spacing-lg);
+            margin-bottom: var(--spacing-sm);
+            font-weight: 600;
+        }
+        
+        .course-description ul {
+            padding-left: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .course-description li {
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .requirements-list {
+            margin-top: var(--spacing-md);
+            padding-left: 0;
+            list-style: none;
+        }
+        
+        .requirements-list li {
+            position: relative;
+            padding-left: 25px;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .requirements-list li::before {
+            content: '\f00c';
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            color: var(--primary-color);
+            position: absolute;
+            left: 0;
+        }
+        
+        @media (max-width: 992px) {
+            .course-content {
+                grid-column: span 12;
+            }
+            
+            .course-sidebar {
+                grid-column: span 12;
+            }
+            
+            .course-meta {
+                flex-wrap: wrap;
+                gap: var(--spacing-md);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img alt="" src="../../assets/images/demo.png" />
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="../../index.html"><i class="fas fa-tachometer-alt"></i>儀表板</a>
+                    </li>
+                    <li>
+                        <a href="../employees/employee-list.html"><i class="fas fa-users"></i>員工管理</a>
+                    </li>
+                    <li>
+                        <a href="../organization/org-chart.html"><i class="fas fa-sitemap"></i>組織架構</a>
+                    </li>
+                    <li>
+                        <a href="../attendance/attendance.html"><i class="fas fa-calendar-check"></i>勤惰管理</a>
+                    </li>
+                    <li>
+                        <a href="../payroll/payroll.html"><i class="fas fa-money-bill-wave"></i>薪資與獎金</a>
+                    </li>
+                    <li class="active">
+                        <a href="training-dashboard.html"><i class="fas fa-graduation-cap"></i>教育訓練</a>
+                    </li>
+                    <li>
+                        <a href="../performance/performance-list.html"><i class="fas fa-chart-line"></i>績效評估</a>
+                    </li>
+                    <li>
+                        <a href="../announcement/announcements.html"><i class="fas fa-bullhorn"></i>公布欄</a>
+                    </li>
+                    <li>
+                        <a href="../operations/operation-records.html"><i class="fas fa-history"></i>操作紀錄</a>
+                    </li>
+                    <li>
+                        <a href="../reports/reports.html"><i class="fas fa-chart-bar"></i>報表中心</a>
+                    </li>
+                    <li>
+                        <a href="../settings/settings.html"><i class="fas fa-cog"></i>系統設定</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <span class="user-info">
+                    <img src="../../assets/images/user-avatar.jpg" alt="使用者頭像" class="avatar">
+                    <span class="user-name">王小明</span>
+                    <span class="user-role">HR專員</span>
+                </span>
+                <a href="../../login.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <h1 class="page-title">課程詳情</h1>
+                    <nav class="breadcrumb">
+                        <a href="../../index.html">首頁</a>
+                        <span class="separator">/</span>
+                        <a href="training-dashboard.html">教育訓練管理</a>
+                        <span class="separator">/</span>
+                        <span class="current">航空服務基礎訓練</span>
+                    </nav>
+                </div>
+                <div class="header-right">
+                    <div class="header-actions">
+                        <button class="btn btn-outline">
+                            <i class="fas fa-arrow-left"></i>返回課程列表
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <!-- Course Header -->
+                <div class="course-header">
+                    <div class="course-banner">
+                        <div class="course-banner-content">
+                            <span class="course-type-badge">必修課程</span>
+                            <h2 class="course-title">航空服務基礎訓練</h2>
+                            <div class="course-meta">
+                                <div class="meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>3小時</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-layer-group"></i>
+                                    <span>12個單元</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-users"></i>
+                                    <span>148人已參與</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-star"></i>
+                                    <span>4.8分 (52評分)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="course-actions">
+                        <button class="enroll-btn">繼續學習</button>
+                    </div>
+                    <div class="course-tabs">
+                        <div class="tab-navigation">
+                            <div class="tab-item active">課程內容</div>
+                            <div class="tab-item">討論區</div>
+                            <div class="tab-item">常見問題</div>
+                            <div class="tab-item">相關課程</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="course-detail-container">
+                    <!-- Course Content -->
+                    <div class="course-content">
+                        <div class="course-description">
+                            <h3>課程簡介</h3>
+                            <p>「航空服務基礎訓練」是為航空旅遊業新進人員所設計的全方位基礎培訓課程。本課程涵蓋航空服務的各個關鍵環節，包括旅客服務基本禮儀、訂位系統操作、機票出票流程、異常處理技巧等實務知識。透過理論與實務的結合，讓學員能在短時間內掌握航空旅遊服務的核心技能。</p>
+                            
+                            <h3>您將學到什麼</h3>
+                            <ul>
+                                <li>航空旅遊業基本知識與運作模式</li>
+                                <li>專業旅客服務技巧與溝通能力</li>
+                                <li>航空票務系統基本操作方法</li>
+                                <li>旅客行程規劃與建議能力</li>
+                                <li>處理航班異常情況的標準流程</li>
+                                <li>旅遊產品銷售與推廣技巧</li>
+                                <li>航空安全與緊急情況處理知識</li>
+                            </ul>
+                            
+                            <h3>適合對象</h3>
+                            <p>本課程特別適合以下人員：</p>
+                            <ul>
+                                <li>航空旅遊業新進人員</li>
+                                <li>客服中心服務人員</li>
+                                <li>需要處理旅遊相關業務的行政人員</li>
+                                <li>有志投入航空旅遊產業的人員</li>
+                            </ul>
+                            
+                            <h3>課程要求</h3>
+                            <ul class="requirements-list">
+                                <li>基本電腦操作能力</li>
+                                <li>良好的溝通表達能力</li>
+                                <li>具備服務熱忱與團隊合作精神</li>
+                                <li>願意接受新知識並持續學習的態度</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Course Sidebar -->
+                    <div class="course-sidebar">
+                        <div class="course-progress-card">
+                            <div class="card-header">
+                                <h3>課程進度</h3>
+                            </div>
+                            <div class="progress-section">
+                                <div class="progress-label">
+                                    <span>學習進度</span>
+                                    <span>75%</span>
+                                </div>
+                                <div class="big-progress-bar">
+                                    <div class="big-progress-fill" style="width: 75%;"></div>
+                                </div>
+                                <div class="progress-meta">
+                                    <small>已完成: 9/12 單元</small>
+                                </div>
+                            </div>
+                            <div class="modules-list">
+                                <div class="module-item">
+                                    <div class="module-status completed">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div class="module-details">
+                                        <div class="module-title">
+                                            <span>1. 航空旅遊業介紹</span>
+                                            <small>15分鐘</small>
+                                        </div>
+                                        <div class="module-meta">
+                                            影片 + 測驗
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="module-item">
+                                    <div class="module-status completed">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div class="module-details">
+                                        <div class="module-title">
+                                            <span>2. 旅客服務基本禮儀</span>
+                                            <small>20分鐘</small>
+                                        </div>
+                                        <div class="module-meta">
+                                            影片 + 互動練習
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="module-item">
+                                    <div class="module-status completed">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div class="module-details">
+                                        <div class="module-title">
+                                            <span>3. 航空公司系統概論</span>
+                                            <small>30分鐘</small>
+                                        </div>
+                                        <div class="module-meta">
+                                            影片 + 閱讀材料
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="module-item">
+                                    <div class="module-status in-progress">
+                                        <i class="fas fa-play"></i>
+                                    </div>
+                                    <div class="module-details">
+                                        <div class="module-title">
+                                            <span>4. 機票訂位實務操作</span>
+                                            <small>25分鐘</small>
+                                        </div>
+                                        <div class="module-meta">
+                                            實機操作演示
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="module-item">
+                                    <div class="module-status locked">
+                                        <i class="fas fa-lock"></i>
+                                    </div>
+                                    <div class="module-details">
+                                        <div class="module-title">
+                                            <span>5. 票務處理標準流程</span>
+                                            <small>20分鐘</small>
+                                        </div>
+                                        <div class="module-meta">
+                                            影片 + 案例分析
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="text-align: center; margin-top: var(--spacing-md);">
+                                <a href="#" style="color: var(--primary-color); font-size: var(--font-size-sm);">顯示所有單元 <i class="fas fa-chevron-down"></i></a>
+                            </div>
+                        </div>
+                        
+                        <div class="course-instructor-card">
+                            <div class="card-header">
+                                <h3>課程講師</h3>
+                            </div>
+                            <div class="instructor-info">
+                                <img src="https://via.placeholder.com/150?text=講師" alt="陳瑞華" class="instructor-avatar">
+                                <div class="instructor-details">
+                                    <h4>陳瑞華</h4>
+                                    <div class="instructor-title">資深空服員 | 航空服務訓練師</div>
+                                </div>
+                            </div>
+                            <div class="instructor-bio">
+                                陳瑞華擁有超過15年的航空服務經驗，曾任職於多家國際航空公司。專長於旅客服務技巧訓練、緊急應變處理以及新進人員培訓。曾主導多項服務品質提升專案，獲得各界肯定。
+                            </div>
+                        </div>
+                        
+                        <div class="course-resources-card">
+                            <div class="card-header">
+                                <h3>課程資源</h3>
+                            </div>
+                            <div class="resources-list">
+                                <div class="resource-item">
+                                    <div class="resource-icon pdf">
+                                        <i class="far fa-file-pdf"></i>
+                                    </div>
+                                    <div class="resource-details">
+                                        <div class="resource-title">航空服務手冊</div>
+                                        <div class="resource-meta">PDF, 2.4MB</div>
+                                    </div>
+                                    <a href="#" class="resource-action">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon doc">
+                                        <i class="far fa-file-word"></i>
+                                    </div>
+                                    <div class="resource-details">
+                                        <div class="resource-title">實務操作練習題</div>
+                                        <div class="resource-meta">DOC, 1.1MB</div>
+                                    </div>
+                                    <a href="#" class="resource-action">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-icon video">
+                                        <i class="far fa-file-video"></i>
+                                    </div>
+                                    <div class="resource-details">
+                                        <div class="resource-title">服務示範影片</div>
+                                        <div class="resource-meta">MP4, 45MB</div>
+                                    </div>
+                                    <a href="#" class="resource-action">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../../assets/js/script.js"></script>
+</body>
+</html> 
